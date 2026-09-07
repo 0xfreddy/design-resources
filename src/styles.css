@@ -1,9 +1,9 @@
 :root {
   font-family: "SFMono-Regular", "SF Mono", "IBM Plex Mono", "Courier New", monospace;
   color: #181713;
-  background: #fff;
+  background: #ebfffb;
   font-synthesis: none;
-  --paper: #fff;
+  --paper: #ebfffb;
   --ink: #181713;
   --muted: #777269;
   --line: rgba(24, 23, 19, 0.22);
@@ -45,6 +45,11 @@ body {
   min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--paper);
 }
 
 a {
@@ -217,6 +222,7 @@ li {
   left: 0;
   z-index: 10;
   width: min(420px, calc(100vw - 32px));
+  height: 287px;
   overflow: hidden;
   border: 1px solid var(--ink);
   background: #fff;
@@ -245,10 +251,6 @@ li {
   background: #fff;
   transform: scale(0.25);
   transform-origin: top left;
-}
-
-.site-preview {
-  height: 287px;
 }
 
 footer {

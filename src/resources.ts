@@ -178,7 +178,6 @@ export const categories: Category[] = [
           r("Morflax", "https://morflax.com"),
           r("Unicorn Studio", "https://unicorn.studio/dashboard"),
           r("UnoCSS", "https://unocss.dev"),
-          r("Vite + TS Demo", "https://vortex-gallery.vercel.app"),
         ],
       },
       {
