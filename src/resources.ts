@@ -41,6 +41,7 @@ export const categories: Category[] = [
           r("Beui", "https://beui.dev"),
           r("Beutiful UI", "https://www.beautifului.dev"),
           r("Beautiful", "https://www.beautifului.dev"),
+          r("FeralUI", "https://feralui.dev"),
         ],
       },
       {
@@ -48,6 +49,7 @@ export const categories: Category[] = [
         items: [
           r("Awesome Swift macOS Apps", "https://github.com/jaywcjlove/awesome-swift-macos-apps"),
           r("MacOS Web Simulator", "https://github.com/LikhithSP/MacOS-Web-Simulator"),
+          r("Shoogle", "https://shoogle.dev/"),
         ],
       },
       {
@@ -80,6 +82,7 @@ export const categories: Category[] = [
           r("110+ CSS Hover Effects", "https://freefrontend.com/css-hover-effects"),
           r("CodePen UI / Motion Demos", "https://codepen.io"),
           r("Theme Toggle View Transition API", "https://theme-toggle.rdsx.dev"),
+          r("Amicro", "https://amicro.vercel.app/Anime"),
         ],
       },
       {
@@ -115,6 +118,10 @@ export const categories: Category[] = [
           r("Liquid Glass Card — Snipzy", "https://snipzy.dev/snippets/liquid-glass-card.html"),
           r("Liquid Glass in the Browser", "https://specy.app/blog/posts/liquid-glass-in-the-web"),
           r("Pattern Craft", "https://patterncraft.fun"),
+          r("Light Rails", "https://light-stroke-rail.vercel.app/"),
+          r("OKLCH.fyi", "https://oklch.fyi/"),
+          r("Liquid Gooey", "https://gooey.jakubantalik.com/"),
+          r("Pryzm", "https://pryzm.design/"),
         ],
       },
       {
@@ -135,7 +142,19 @@ export const categories: Category[] = [
     groups: [
       {
         title: "Icons",
-        items: [r("Core Icons", "https://nucleoapp.com/core-icons"), r("Notion Icons", "https://notionicons.so")],
+        items: [
+          r("Core Icons", "https://nucleoapp.com/core-icons"),
+          r("Notion Icons", "https://notionicons.so"),
+          r("Lucide Animated", "https://lucide-animated.com/"),
+          r("AnimateIcons", "https://animateicons.in/icons/lucide"),
+          r("Heroicons Animated", "https://heroicons-animated.com/"),
+          r("React UseAnimations", "https://github.com/useAnimations/react-useanimations"),
+          r("Lucide Motion Vue", "https://github.com/respeak-io/lucide-motion-vue"),
+          r("Line MD", "https://icon-sets.iconify.design/line-md"),
+          r("Moving Icons", "https://movingicons.dev/icons"),
+          r("It's Hover", "https://itshover.com/icons"),
+          r("Morphicons", "https://morphicons.com"),
+        ],
       },
       {
         title: "Fonts & Typefaces",
@@ -166,6 +185,8 @@ export const categories: Category[] = [
           r("Roman Tesliuk", "https://pixelwrld.co"),
           r("Curated Design Articles", "https://curated.design"),
           r("Logos", "https://brandfetch.com"),
+          r("Movin.design", "https://movin.design/"),
+          r("Design Minis", "https://www.designminis.com/"),
         ],
       },
       {
