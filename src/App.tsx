@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
+import MediaBetweenText from "./MediaBetweenText"
 import { categories } from "./resources"
 
 const resourceCount = categories.reduce(
@@ -11,7 +12,7 @@ const resourceCount = categories.reduce(
 function getInitialTheme() {
   const saved = localStorage.getItem("resource-index-theme")
   if (saved === "dark" || saved === "light") return saved
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  return "light"
 }
 
 export default function App() {
@@ -36,11 +37,33 @@ export default function App() {
       <main>
         <header className="page-heading">
           <h1><span>{resourceCount}</span> design resources</h1>
-          <p className="subtitle">
-            all the best libraries/tools i've found on x, reddit and dms
-            <br />
-            for daily feed: <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">tested in prod</a>
-          </p>
+          <div className="subtitle">
+            <p>all the best libraries/tools i've found on x, reddit and dms</p>
+            <div className="daily-feed-line">
+              <span>for daily feed:</span>
+              <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">
+                <MediaBetweenText
+                  firstText="tested"
+                  secondText="in prod"
+                  mediaUrl="/tested-in-prod.jpeg"
+                  mediaType="image"
+                  triggerType="hover"
+                  as="span"
+                  alt="Banana character sitting on a folding chair"
+                  className="media-between-text"
+                  mediaContainerClassName="daily-feed-media"
+                  animationVariants={{
+                    initial: { width: 0, opacity: 1 },
+                    animate: {
+                      width: 28,
+                      opacity: 1,
+                      transition: { duration: 0.4, type: "spring", bounce: 0 },
+                    },
+                  }}
+                />
+              </a>
+            </div>
+          </div>
         </header>
 
         <div className="directory">
