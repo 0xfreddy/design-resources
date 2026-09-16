@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate:readme": "node scripts/generate-readme.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
