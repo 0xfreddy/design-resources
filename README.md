@@ -1,6 +1,6 @@
 # Design Resources
 
-A compact, categorized index of 91 design resources across 5 categories and 18 groups.
+A compact, categorized index of 101 design resources across 5 categories and 21 groups.
 
 This repo contains a Vite website and a GitHub-friendly resource directory. Both are powered by the catalog in [`src/resources.ts`](src/resources.ts), so the site and README stay organized around the same source of truth.
 
@@ -48,6 +48,7 @@ Create a production build with `npm run build`.
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beutiful UI website preview" width="260"></a> | **[Beutiful UI](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beautiful website preview" width="260"></a> | **[Beautiful](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://feralui.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fferalui.dev?w=620" alt="FeralUI website preview" width="260"></a> | **[FeralUI](https://feralui.dev)**<br><sub>feralui.dev</sub> |
+| <a href="https://www.obsidianui.dev/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.obsidianui.dev%2F?w=620" alt="Obsidian UI website preview" width="260"></a> | **[Obsidian UI](https://www.obsidianui.dev/)**<br><sub>obsidianui.dev</sub><br><sub>Dark, polished React components</sub> |
 
 </details>
 
@@ -145,6 +146,7 @@ Create a production build with `npm run build`.
 | <a href="https://photogradient.com"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fphotogradient.com?w=620" alt="Photo Gradient website preview" width="260"></a> | **[Photo Gradient](https://photogradient.com)**<br><sub>photogradient.com</sub> |
 | <a href="https://snipzy.dev/snippets/liquid-glass-card.html"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fsnipzy.dev%2Fsnippets%2Fliquid-glass-card.html?w=620" alt="Liquid Glass Card — Snipzy website preview" width="260"></a> | **[Liquid Glass Card — Snipzy](https://snipzy.dev/snippets/liquid-glass-card.html)**<br><sub>snipzy.dev</sub> |
 | <a href="https://specy.app/blog/posts/liquid-glass-in-the-web"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fspecy.app%2Fblog%2Fposts%2Fliquid-glass-in-the-web?w=620" alt="Liquid Glass in the Browser website preview" width="260"></a> | **[Liquid Glass in the Browser](https://specy.app/blog/posts/liquid-glass-in-the-web)**<br><sub>specy.app</sub> |
+| <a href="https://gradientool.com"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fgradientool.com?w=620" alt="Gradientool website preview" width="260"></a> | **[Gradientool](https://gradientool.com)**<br><sub>gradientool.com</sub><br><sub>Gradient generator and color tooling</sub> |
 | <a href="https://patterncraft.fun"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fpatterncraft.fun?w=620" alt="Pattern Craft website preview" width="260"></a> | **[Pattern Craft](https://patterncraft.fun)**<br><sub>patterncraft.fun</sub> |
 | <a href="https://light-stroke-rail.vercel.app/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Flight-stroke-rail.vercel.app%2F?w=620" alt="Light Rails website preview" width="260"></a> | **[Light Rails](https://light-stroke-rail.vercel.app/)**<br><sub>light-stroke-rail.vercel.app</sub> |
 | <a href="https://oklch.fyi/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Foklch.fyi%2F?w=620" alt="OKLCH.fyi website preview" width="260"></a> | **[OKLCH.fyi](https://oklch.fyi/)**<br><sub>oklch.fyi</sub> |
@@ -238,6 +240,9 @@ Create a production build with `npm run build`.
 | Preview | Resource |
 | --- | --- |
 | <a href="https://brik.space/Home"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fbrik.space%2FHome?w=620" alt="Brik AI / Brik Space website preview" width="260"></a> | **[Brik AI / Brik Space](https://brik.space/Home)**<br><sub>brik.space</sub> |
+| <a href="https://www.playgrnd.tools"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.playgrnd.tools?w=620" alt="Playgrnd Tools website preview" width="260"></a> | **[Playgrnd Tools](https://www.playgrnd.tools)**<br><sub>playgrnd.tools</sub><br><sub>AI playground for creative tools</sub> |
+| <a href="https://app.quiver.ai/discover"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fapp.quiver.ai%2Fdiscover?w=620" alt="Quiver Discover website preview" width="260"></a> | **[Quiver Discover](https://app.quiver.ai/discover)**<br><sub>app.quiver.ai</sub><br><sub>AI discovery and inspiration feed</sub> |
+| <a href="https://app.revyl.ai/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fapp.revyl.ai%2F?w=620" alt="Revyl website preview" width="260"></a> | **[Revyl](https://app.revyl.ai/)**<br><sub>app.revyl.ai</sub><br><sub>AI creative review and iteration tool</sub> |
 | <a href="https://swishy.ai"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fswishy.ai?w=620" alt="Swishy website preview" width="260"></a> | **[Swishy](https://swishy.ai)**<br><sub>swishy.ai</sub> |
 
 </details>
@@ -254,11 +259,40 @@ Create a production build with `npm run build`.
 </details>
 
 <details open>
+<summary><strong>Product Mockups &amp; Launch Visuals</strong></summary>
+
+| Preview | Resource |
+| --- | --- |
+| <a href="https://www.ultramock.io/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.ultramock.io%2F?w=620" alt="Ultramock website preview" width="260"></a> | **[Ultramock](https://www.ultramock.io/)**<br><sub>ultramock.io</sub><br><sub>Premium product visuals and 3D mockups</sub> |
+| <a href="https://www.raylight.app/signup?ref=QZQ4k3x5L9OxuX6W"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.raylight.app%2Fsignup%3Fref%3DQZQ4k3x5L9OxuX6W?w=620" alt="Raylight website preview" width="260"></a> | **[Raylight](https://www.raylight.app/signup?ref=QZQ4k3x5L9OxuX6W)**<br><sub>raylight.app</sub><br><sub>Product videos and motion visuals</sub> |
+
+</details>
+
+<details open>
 <summary><strong>Maps / Spatial UI Tools</strong></summary>
 
 | Preview | Resource |
 | --- | --- |
 | <a href="https://mapcn.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fmapcn.dev?w=620" alt="mapcn website preview" width="260"></a> | **[mapcn](https://mapcn.dev)**<br><sub>mapcn.dev</sub> |
+
+</details>
+
+<details open>
+<summary><strong>Product Analytics &amp; Feedback</strong></summary>
+
+| Preview | Resource |
+| --- | --- |
+| <a href="https://posthog.com"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fposthog.com?w=620" alt="PostHog website preview" width="260"></a> | **[PostHog](https://posthog.com)**<br><sub>posthog.com</sub><br><sub>Open-source product analytics platform</sub> |
+
+</details>
+
+<details open>
+<summary><strong>Design Creators &amp; Research</strong></summary>
+
+| Preview | Resource |
+| --- | --- |
+| <a href="https://x.com/pendev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fx.com%2Fpendev?w=620" alt="PenDev website preview" width="260"></a> | **[PenDev](https://x.com/pendev)**<br><sub>x.com</sub><br><sub>Design and product inspiration feed</sub> |
+| <a href="https://appllama.io/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fappllama.io%2F?w=620" alt="Appllama website preview" width="260"></a> | **[Appllama](https://appllama.io/)**<br><sub>appllama.io</sub><br><sub>Mobile app screen and flow research</sub> |
 
 </details>
 

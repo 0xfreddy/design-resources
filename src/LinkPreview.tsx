@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react"
 
 type LinkPreviewProps = {
@@ -6,30 +6,38 @@ type LinkPreviewProps = {
   children: ReactNode
 }
 
+function getDomain(href: string) {
+  return new URL(href).hostname.replace("www.", "")
+}
+
+function getScreenshotUrl(href: string) {
+  return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(href)}?w=720`
+}
+
 export function LinkPreview({ href, children }: LinkPreviewProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isTouch, setIsTouch] = useState(false)
-  const pointerX = useMotionValue(0)
-  const pointerY = useMotionValue(0)
-  const previewX = useSpring(pointerX, { stiffness: 260, damping: 28, mass: 0.45 })
-  const previewY = useSpring(pointerY, { stiffness: 260, damping: 28, mass: 0.45 })
+  const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
+  const previewUrl = getScreenshotUrl(href)
 
   useEffect(() => {
     setIsTouch(window.matchMedia("(hover: none)").matches)
   }, [])
 
-  const movePreview = (event: MouseEvent<HTMLAnchorElement>) => {
-    const width = Math.min(420, window.innerWidth - 32)
-    const height = width * 0.625
-    const gutter = 16
-    let x = event.clientX + 24
-    let y = event.clientY - height / 2
+  const placePreview = (event: MouseEvent<HTMLAnchorElement>) => {
+    const gutter = 18
+    const shadow = 8
+    const width = Math.min(320, window.innerWidth - gutter * 2 - shadow)
+    const height = width * 0.625 + 28 + shadow
+    const rect = event.currentTarget.getBoundingClientRect()
+    const preferredX = rect.right + 16
+    let x = preferredX
+    let y = rect.top + rect.height / 2 - height / 2
 
-    if (x + width > window.innerWidth - gutter) x = event.clientX - width - 24
+    x = Math.max(gutter, Math.min(x, window.innerWidth - width - shadow - gutter))
     y = Math.max(gutter, Math.min(y, window.innerHeight - height - gutter))
 
-    pointerX.set(x)
-    pointerY.set(y)
+    setPreviewPosition({ x, y })
   }
 
   return (
@@ -40,10 +48,9 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
         target="_blank"
         rel="noreferrer"
         onMouseEnter={(event) => {
-          movePreview(event)
+          placePreview(event)
           if (!isTouch) setIsHovered(true)
         }}
-        onMouseMove={movePreview}
         onMouseLeave={() => setIsHovered(false)}
         onFocus={() => setIsHovered(false)}
       >
@@ -54,17 +61,17 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
         {isHovered && (
           <motion.aside
             className="site-preview"
-            style={{ x: previewX, y: previewY }}
-            initial={{ opacity: 0, scale: 0.94 }}
+            style={{ x: previewPosition.x, y: previewPosition.y }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.14, ease: "easeOut" }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
             aria-hidden="true"
           >
             <div className="preview-bar">
-              <span>{new URL(href).hostname.replace("www.", "")}</span>
+              <span>{getDomain(href)}</span>
             </div>
-            <iframe src={href} title="" tabIndex={-1} loading="eager" />
+            <img src={previewUrl} alt="" loading="eager" decoding="async" />
           </motion.aside>
         )}
       </AnimatePresence>

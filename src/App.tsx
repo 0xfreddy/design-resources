@@ -1,8 +1,19 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
 import MediaBetweenText from "./MediaBetweenText"
 import { categories } from "./resources"
+
+type Recommendation = {
+  id: string
+  name: string
+  url: string
+  note?: string
+  category: string
+  group: string
+  probability?: number
+  confidence?: number | null
+}
 
 const resourceCount = categories.reduce(
   (total, category) => total + category.groups.reduce((groupTotal, group) => groupTotal + group.items.length, 0),
@@ -17,12 +28,43 @@ function getInitialTheme() {
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme)
+  const [prompt, setPrompt] = useState("")
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
+  const [recommendationMessage, setRecommendationMessage] = useState("")
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme
     localStorage.setItem("resource-index-theme", theme)
   }, [theme])
+
+  const requestRecommendations = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const query = prompt.trim()
+    if (!query) return
+
+    setRecommendationStatus("loading")
+    setRecommendationMessage("")
+
+    try {
+      const response = await fetch("/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      })
+      const data = await response.json()
+
+      if (Array.isArray(data.picks)) setRecommendations(data.picks)
+      if (!response.ok) throw new Error(data.error ?? "Jev could not rank the resources.")
+
+      setRecommendationStatus("ready")
+      setRecommendationMessage(data.provider === "jev" ? "ranked by jev" : "ranked locally")
+    } catch (error) {
+      setRecommendationStatus("error")
+      setRecommendationMessage(error instanceof Error ? error.message : "Jev could not rank the resources.")
+    }
+  }
 
   let index = 0
 
@@ -36,7 +78,7 @@ export default function App() {
 
       <main>
         <header className="page-heading">
-          <h1><span>{resourceCount}</span> design resources</h1>
+          <h1><span>{resourceCount}</span> vibe resources for your next project</h1>
           <div className="subtitle">
             <p>all the best libraries/tools i've found on x, reddit and dms</p>
             <div className="daily-feed-line">
@@ -65,6 +107,54 @@ export default function App() {
             </div>
           </div>
         </header>
+
+        <section className="recommender" aria-labelledby="recommender-title">
+          <form onSubmit={requestRecommendations}>
+            <label htmlFor="resource-prompt" id="recommender-title">
+              what are you building?
+            </label>
+            <div className="prompt-row">
+              <input
+                id="resource-prompt"
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="glassy saas landing page, animated icons, mobile onboarding..."
+              />
+              <button type="submit" disabled={recommendationStatus === "loading" || !prompt.trim()}>
+                {recommendationStatus === "loading" ? "…" : "pick"}
+              </button>
+            </div>
+          </form>
+
+          {(recommendations.length > 0 || recommendationMessage) && (
+            <div className="recommendation-results">
+              <div className="recommendation-heading">
+                <h2>jev picks</h2>
+                {recommendationMessage && <span>{recommendationMessage}</span>}
+              </div>
+
+              {recommendations.length > 0 && (
+                <ol className="recommendation-list">
+                  {recommendations.map((resource, recommendationIndex) => (
+                    <li key={resource.id}>
+                      <span className="number">{String(recommendationIndex + 1).padStart(2, "0")}</span>
+                      <LinkPreview href={resource.url}>
+                        <span className="name">{resource.name}</span>
+                        <span className="domain">
+                          {resource.group}
+                          {typeof resource.probability === "number"
+                            ? ` · ${Math.round(resource.probability * 100)}%`
+                            : ""}
+                        </span>
+                        <span className="arrow" aria-hidden="true">↗</span>
+                      </LinkPreview>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          )}
+        </section>
 
         <div className="directory">
           {categories.map((category) => (
@@ -98,7 +188,8 @@ export default function App() {
 
         <footer>
           <span>
-            built by <a href="https://x.com/freddy_0x" target="_blank" rel="noreferrer">0xfreddy</a>
+            built by <a href="https://x.com/freddy_0x" target="_blank" rel="noreferrer">0xfreddy</a> and{" "}
+            <a href="https://x.com/YieldMaxing" target="_blank" rel="noreferrer">Max</a>
           </span>
           <span>·</span>
           <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">tested in prod</a>

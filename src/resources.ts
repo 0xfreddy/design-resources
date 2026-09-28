@@ -42,6 +42,7 @@ export const categories: Category[] = [
           r("Beutiful UI", "https://www.beautifului.dev"),
           r("Beautiful", "https://www.beautifului.dev"),
           r("FeralUI", "https://feralui.dev"),
+          r("Obsidian UI", "https://www.obsidianui.dev/", "Dark, polished React components"),
         ],
       },
       {
@@ -117,6 +118,7 @@ export const categories: Category[] = [
           r("Photo Gradient", "https://photogradient.com"),
           r("Liquid Glass Card — Snipzy", "https://snipzy.dev/snippets/liquid-glass-card.html"),
           r("Liquid Glass in the Browser", "https://specy.app/blog/posts/liquid-glass-in-the-web"),
+          r("Gradientool", "https://gradientool.com", "Gradient generator and color tooling"),
           r("Pattern Craft", "https://patterncraft.fun"),
           r("Light Rails", "https://light-stroke-rail.vercel.app/"),
           r("OKLCH.fyi", "https://oklch.fyi/"),
@@ -191,7 +193,13 @@ export const categories: Category[] = [
       },
       {
         title: "AI Design / Generation Tools",
-        items: [r("Brik AI / Brik Space", "https://brik.space/Home"), r("Swishy", "https://swishy.ai")],
+        items: [
+          r("Brik AI / Brik Space", "https://brik.space/Home"),
+          r("Playgrnd Tools", "https://www.playgrnd.tools", "AI playground for creative tools"),
+          r("Quiver Discover", "https://app.quiver.ai/discover", "AI discovery and inspiration feed"),
+          r("Revyl", "https://app.revyl.ai/", "AI creative review and iteration tool"),
+          r("Swishy", "https://swishy.ai"),
+        ],
       },
       {
         title: "Design-to-Code / Tool Builders",
@@ -202,8 +210,26 @@ export const categories: Category[] = [
         ],
       },
       {
+        title: "Product Mockups & Launch Visuals",
+        items: [
+          r("Ultramock", "https://www.ultramock.io/", "Premium product visuals and 3D mockups"),
+          r("Raylight", "https://www.raylight.app/signup?ref=QZQ4k3x5L9OxuX6W", "Product videos and motion visuals"),
+        ],
+      },
+      {
         title: "Maps / Spatial UI Tools",
         items: [r("mapcn", "https://mapcn.dev")],
+      },
+      {
+        title: "Product Analytics & Feedback",
+        items: [r("PostHog", "https://posthog.com", "Open-source product analytics platform")],
+      },
+      {
+        title: "Design Creators & Research",
+        items: [
+          r("PenDev", "https://x.com/pendev", "Design and product inspiration feed"),
+          r("Appllama", "https://appllama.io/", "Mobile app screen and flow research"),
+        ],
       },
     ],
   },
