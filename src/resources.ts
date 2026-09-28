@@ -18,7 +18,6 @@ export const categories: Category[] = [
       {
         title: "Component Libraries / Full Kits",
         items: [
-          r("21st.dev", "https://21st.dev/home", "AI component marketplace"),
           r("Aceternity UI", "https://ui.aceternity.com"),
           r("SHSF UI Cards", "https://shsfui.com/primitives/cards"),
           r("Animate UI", "https://animate-ui.com"),
@@ -43,6 +42,7 @@ export const categories: Category[] = [
           r("Beautiful", "https://www.beautifului.dev"),
           r("FeralUI", "https://feralui.dev"),
           r("Obsidian UI", "https://www.obsidianui.dev/", "Dark, polished React components"),
+          r("21st.dev", "https://21st.dev/home", "AI component marketplace"),
         ],
       },
       {

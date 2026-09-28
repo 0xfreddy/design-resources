@@ -24,7 +24,6 @@ Create a production build with `npm run build`.
 
 | Preview | Resource |
 | --- | --- |
-| <a href="https://21st.dev/home"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2F21st.dev%2Fhome?w=620" alt="21st.dev website preview" width="260"></a> | **[21st.dev](https://21st.dev/home)**<br><sub>21st.dev</sub><br><sub>AI component marketplace</sub> |
 | <a href="https://ui.aceternity.com"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fui.aceternity.com?w=620" alt="Aceternity UI website preview" width="260"></a> | **[Aceternity UI](https://ui.aceternity.com)**<br><sub>ui.aceternity.com</sub> |
 | <a href="https://shsfui.com/primitives/cards"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fshsfui.com%2Fprimitives%2Fcards?w=620" alt="SHSF UI Cards website preview" width="260"></a> | **[SHSF UI Cards](https://shsfui.com/primitives/cards)**<br><sub>shsfui.com</sub> |
 | <a href="https://animate-ui.com"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fanimate-ui.com?w=620" alt="Animate UI website preview" width="260"></a> | **[Animate UI](https://animate-ui.com)**<br><sub>animate-ui.com</sub> |
@@ -49,6 +48,7 @@ Create a production build with `npm run build`.
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beautiful website preview" width="260"></a> | **[Beautiful](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://feralui.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fferalui.dev?w=620" alt="FeralUI website preview" width="260"></a> | **[FeralUI](https://feralui.dev)**<br><sub>feralui.dev</sub> |
 | <a href="https://www.obsidianui.dev/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.obsidianui.dev%2F?w=620" alt="Obsidian UI website preview" width="260"></a> | **[Obsidian UI](https://www.obsidianui.dev/)**<br><sub>obsidianui.dev</sub><br><sub>Dark, polished React components</sub> |
+| <a href="https://21st.dev/home"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2F21st.dev%2Fhome?w=620" alt="21st.dev website preview" width="260"></a> | **[21st.dev](https://21st.dev/home)**<br><sub>21st.dev</sub><br><sub>AI component marketplace</sub> |
 
 </details>
 
