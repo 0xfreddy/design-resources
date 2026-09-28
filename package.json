@@ -7,19 +7,20 @@
     "dev": "vite",
     "generate:readme": "node scripts/generate-readme.mjs",
     "build": "tsc -b && vite build",
+    "start": "node server/index.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
     "pullcord": "^0.1.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "typescript": "^5.9.2"
   },
   "devDependencies": {
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "typescript": "^5.9.2",
     "vite": "^8.2.2"
   }
 }
