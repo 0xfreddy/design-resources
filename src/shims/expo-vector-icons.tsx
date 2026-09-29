@@ -1,4 +1,5 @@
 import { Text } from "react-native"
+import { Search, X } from "lucide-react"
 
 type IconProps = {
   name?: string
@@ -23,4 +24,9 @@ function Feather({ name, size = 20, color = "currentColor" }: IconProps) {
   )
 }
 
-export { Feather }
+function Ionicons({ name, size = 20, color = "currentColor" }: IconProps) {
+  const Icon = name === "search" ? Search : X
+  return <Icon size={size} color={color} />
+}
+
+export { Feather, Ionicons }

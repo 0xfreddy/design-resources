@@ -2,10 +2,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { ArrowUpRight, Check, Expand, Plus, X } from "lucide-react"
+import { loadSkia } from "./loadSkia"
 
 const IntelligenceFrame = lazy(async () => {
-  const { LoadSkiaWeb } = await import("@shopify/react-native-skia/lib/module/web/LoadSkiaWeb")
-  await LoadSkiaWeb({ locateFile: () => new URL("../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm", import.meta.url).href })
+  await loadSkia()
   return import("./IntelligenceFrame")
 })
 
@@ -101,6 +101,7 @@ export function LinkPreview({ href, name, description, category, children, selec
         keep()
       }} onMouseLeave={leave}>{children}</a>
     {createPortal(<AnimatePresence>{hovered && !expanded && <motion.aside className="site-preview" style={{ left: position.x, top: position.y }} onMouseEnter={keep} onMouseLeave={leave}
+      onWheel={event => { anchor.current?.closest(".directory")?.parentElement?.scrollBy({ top: event.deltaY, left: event.deltaX }); setHovered(false) }}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
       <div className="preview-frame">{previewImage}</div>
       <div className="preview-actions"><span>{name}</span><button title="Expand preview" aria-label={`Expand ${name} preview`} onClick={open}><Expand size={16} /></button></div>

@@ -22,9 +22,10 @@ export default defineConfig(({ mode }) => {
       global: "globalThis",
     },
     resolve: {
-      alias: {
+      alias: [{ find: /^react-native-svg$/, replacement: resolve(rootDir, "src/shims/react-native-svg.ts") }, ...Object.entries({
         "@": resolve(rootDir, "src"),
         "react-native/Libraries/Image/AssetRegistry": resolve(rootDir, "node_modules/react-native-web/dist/modules/AssetRegistry/index.js"),
+        "@react-native/assets-registry/registry": resolve(rootDir, "node_modules/react-native-web/dist/modules/AssetRegistry/index.js"),
         "react-native": "react-native-web",
         "react-native-gesture-handler": resolve(
           rootDir,
@@ -34,7 +35,7 @@ export default defineConfig(({ mode }) => {
         "expo-blur": resolve(rootDir, "src/shims/expo-blur.tsx"),
         "expo-haptics": resolve(rootDir, "src/shims/expo-haptics.ts"),
         "expo-symbols": resolve(rootDir, "src/shims/expo-symbols.tsx"),
-      },
+      }).map(([find, replacement]) => ({ find, replacement }))],
       extensions: [".web.tsx", ".web.ts", ".web.js", ".tsx", ".ts", ".jsx", ".js", ".json"],
     },
     optimizeDeps: {

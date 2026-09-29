@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { Globe2, LayoutGrid, List, Plus, X } from "lucide-react"
+import { LayoutGrid, List, Plus, X } from "lucide-react"
 import { FanDirection, FanItemDirection, FanMenu } from "./reaticx/fan-menu"
 import { ExpandableView } from "./reaticx/expandable-view"
 import { useExpandable } from "./reaticx/expandable-view/context"
@@ -46,7 +46,7 @@ export function ViewMenu({ value, onChange }: { value: "list" | "grid"; onChange
 type Location = { id: string; location: [number, number]; region: string }
 const noArcs: [] = []
 
-function GlobeContent({ dark }: { dark: boolean }) {
+function GlobeContent({ dark, diameter, width }: { dark: boolean; diameter: number; width: number }) {
   const { expanded, collapse } = useExpandable("GlobeContent")
   const [locations, setLocations] = useState<Location[]>([])
   const [status, setStatus] = useState("Visitor locations unavailable")
@@ -83,14 +83,14 @@ function GlobeContent({ dark }: { dark: boolean }) {
     }
   }, [expanded, collapse])
   return (
-    <div className="globe-content" role={expanded ? "dialog" : undefined} aria-label="Live visitors" aria-hidden={!expanded} inert={!expanded}>
+    <div className="globe-content" style={{ width, height: diameter + 104 }} role={expanded ? "dialog" : undefined} aria-label="Live visitors" aria-hidden={!expanded} inert={!expanded}>
       <div ref={closeRef} className="globe-close">
-        <ExpandableView.Close style={{ backgroundColor: "var(--surface)", borderWidth: 1, borderColor: "var(--line)" }}>
-          <span title="Close visitors" aria-label="Close visitors"><X size={18} /></span>
+        <ExpandableView.Close style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: "transparent", borderWidth: 0 }}>
+          <span className="close-glyph" title="Close visitors" aria-label="Close visitors"><X size={17} strokeWidth={1.7} /></span>
         </ExpandableView.Close>
       </div>
       <h2>Live visitors</h2>
-      {expanded && <GlobeCdn className="live-globe" markers={locations} arcs={noArcs} dark={dark} />}
+      {expanded && <div className="globe-square" style={{ width: diameter, height: diameter }}><GlobeCdn className="live-globe" markers={locations} arcs={noArcs} dark={dark} /></div>}
       <p className="globe-note" role="status">{status}</p>
     </div>
   )
@@ -98,13 +98,31 @@ function GlobeContent({ dark }: { dark: boolean }) {
 
 export function GlobeDock({ dark }: { dark: boolean }) {
   const size = useViewport()
+  const [anchor, setAnchor] = useState({ left: 22, width: 254 })
+  useLayoutEffect(() => {
+    const sidebar = document.querySelector<HTMLElement>(".side-panel")
+    const sponsor = document.querySelector<HTMLElement>(".sponsor-card")
+    if (!sidebar || !sponsor) return
+    const measure = () => {
+      const card = sponsor.getBoundingClientRect()
+      const panel = sidebar.getBoundingClientRect()
+      setAnchor(card.width ? { left: card.left, width: card.width } : { left: panel.left + 20, width: panel.width - 40 })
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(sidebar)
+    observer.observe(sponsor)
+    measure()
+    return () => observer.disconnect()
+  }, [size.width])
+  const width = anchor.width
+  const diameter = Math.max(80, Math.min(width - 40, size.height - 136))
   return createPortal(
-    <div className="globe-dock">
-      <ExpandableView collapsedWidth={170} expandedWidth={Math.min(370, size.width - 32)} collapsedHeight={44}
-        expandedHeight={Math.min(440, size.height - 32)} expandedRadius={24}
+    <div className="globe-dock" style={{ left: anchor.left }}>
+      <ExpandableView collapsedWidth={width} expandedWidth={width} collapsedHeight={44}
+        expandedHeight={diameter + 104} collapsedRadius={8} expandedRadius={8}
         style={{ maxWidth: size.width - 32, maxHeight: size.height - 32, backgroundColor: "var(--paper)", borderWidth: 1, borderColor: "var(--line)", boxShadow: "0 12px 48px rgba(0,0,0,0.16)" }}>
-        <ExpandableView.Collapsed><span className="expandable-trigger-copy"><Globe2 size={18} /><span>Live visitors</span></span></ExpandableView.Collapsed>
-        <ExpandableView.Expanded><GlobeContent dark={dark} /></ExpandableView.Expanded>
+        <ExpandableView.Collapsed><span className="expandable-trigger-copy"><span>Live visitors</span></span></ExpandableView.Collapsed>
+        <ExpandableView.Expanded><GlobeContent dark={dark} diameter={diameter} width={width} /></ExpandableView.Expanded>
       </ExpandableView>
     </div>, document.body,
   )

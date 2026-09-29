@@ -150,6 +150,60 @@
       "source": "https://www.reacticx.com/components/apple-intelligence",
       "upstreamSha256": "dc4a44f5152cde867106ddbdab726be61fcf16fd2fd032e499f0d361d2584d4f",
       "installedSha256": "dc4a44f5152cde867106ddbdab726be61fcf16fd2fd032e499f0d361d2584d4f"
+    },
+    {
+      "file": "check-box/index.tsx",
+      "source": "https://www.reacticx.com/components/check-box",
+      "upstreamSha256": "59396e0effd79aaa32418d8219f7d1af1328533f7ec2e76fa25483558d3022b7",
+      "installedSha256": "59396e0effd79aaa32418d8219f7d1af1328533f7ec2e76fa25483558d3022b7"
+    },
+    {
+      "file": "check-box/conf.ts",
+      "source": "https://www.reacticx.com/components/check-box",
+      "upstreamSha256": "e9244ee4942175604766fb71ae4faf32f85061433783b952c9966354d38c7819",
+      "installedSha256": "e9244ee4942175604766fb71ae4faf32f85061433783b952c9966354d38c7819"
+    },
+    {
+      "file": "check-box/types.ts",
+      "source": "https://www.reacticx.com/components/check-box",
+      "upstreamSha256": "37481715b2489fdfe1bd8d23fd5398f63c5cefd8d63cde3569a56f2b404d8dbc",
+      "installedSha256": "37481715b2489fdfe1bd8d23fd5398f63c5cefd8d63cde3569a56f2b404d8dbc"
+    },
+    {
+      "file": "radiant-button/conf.ts",
+      "source": "https://www.reacticx.com/components/radiant-button",
+      "upstreamSha256": "a710cc287060e7738bbeb1a0611c436280e489cb64547cd99da2f2d3555698df",
+      "installedSha256": "a710cc287060e7738bbeb1a0611c436280e489cb64547cd99da2f2d3555698df"
+    },
+    {
+      "file": "radiant-button/helpers.ts",
+      "source": "https://www.reacticx.com/components/radiant-button",
+      "upstreamSha256": "a0d85b118b373b55ba41522cb2f7bf43bc232e588bc58c663c4eccaa515eb157",
+      "installedSha256": "a0d85b118b373b55ba41522cb2f7bf43bc232e588bc58c663c4eccaa515eb157"
+    },
+    {
+      "file": "radiant-button/index.tsx",
+      "source": "https://www.reacticx.com/components/radiant-button",
+      "upstreamSha256": "6bb2f1e09fbc5dd288956a1f7890d732773660b6816e73b5c8859e3c50cb1af6",
+      "installedSha256": "eeb7e2f847486f64f75e94a9f7e582a9037b39f22af540b0a0f1a249aa8808ea"
+    },
+    {
+      "file": "radiant-button/types.ts",
+      "source": "https://www.reacticx.com/components/radiant-button",
+      "upstreamSha256": "12356f8ba3530c3cc50989ae007e2f8ade2cc1988e133f45f39bcc80a58a01a1",
+      "installedSha256": "12356f8ba3530c3cc50989ae007e2f8ade2cc1988e133f45f39bcc80a58a01a1"
+    },
+    {
+      "file": "search-bar/SearchBar.tsx",
+      "source": "https://www.reacticx.com/components/search-bar",
+      "upstreamSha256": "292fae75bf5644c62862fa65806a8687925dbb677e79b7c0fa05d2aa4594bd44",
+      "installedSha256": "5f04c99ced40bbf1ee273e708324ba15da6fe5ea4f9bcc68abbd73e2cc730aa3"
+    },
+    {
+      "file": "search-bar/SearchBar.types.ts",
+      "source": "https://www.reacticx.com/components/search-bar",
+      "upstreamSha256": "9a384c680b13cd07259d64b3e206fac49c1149bc65581c62a1efa13527e307d5",
+      "installedSha256": "b2abaf7304818a9e47c752c4c5b3693dea52e72cf8754cb610a6d83f0cb80878"
     }
   ]
 }

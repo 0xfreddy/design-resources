@@ -13,7 +13,16 @@ export function createStacksHandler(file = resolve(process.env.STACKS_FILE || ".
     res.setHeader("Content-Type", "application/json")
     res.setHeader("Cache-Control", "no-store")
     try {
-      if (req.method === "GET") { res.end(JSON.stringify({ stacks: (await read()).slice(0, 100) })); return }
+      if (req.method === "GET") {
+        const id = new URL(req.url ?? "/", "http://localhost").searchParams.get("id")
+        const stacks = await read()
+        if (id) {
+          const stack = stacks.find(item => item.id === id)
+          res.statusCode = stack ? 200 : 404
+          res.end(JSON.stringify(stack ? { stack } : { error: "Stack not found" }))
+        } else res.end(JSON.stringify({ stacks: stacks.slice(0, 100) }))
+        return
+      }
       if (req.method !== "POST") { res.statusCode = 405; res.end(); return }
       const origin = req.headers.origin
       if (origin && new URL(origin).host !== req.headers.host) { res.statusCode = 403; res.end(JSON.stringify({ error: "Request origin rejected" })); return }

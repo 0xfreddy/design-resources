@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useMemo,
   useImperativeHandle,
   useRef,
   useState,
@@ -86,10 +87,7 @@ export const MediaBetweenText = forwardRef<
     const [isAnimating, setIsAnimating] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
 
-    const isInView =
-      triggerType === "inView"
-        ? useInView(componentRef, useInViewOptionsProp)
-        : false
+    const isInView = useInView(componentRef, useInViewOptionsProp)
 
     useImperativeHandle(ref, () => ({
       animate: () => setIsAnimating(true),
@@ -105,7 +103,7 @@ export const MediaBetweenText = forwardRef<
             ? isAnimating
             : false
 
-    const TextComponent = motion.create(as)
+    const TextComponent = useMemo(() => motion.create(as), [as])
 
     return (
       <div
@@ -113,6 +111,8 @@ export const MediaBetweenText = forwardRef<
         ref={componentRef}
         onMouseEnter={() => triggerType === "hover" && setIsHovered(true)}
         onMouseLeave={() => triggerType === "hover" && setIsHovered(false)}
+        onFocus={() => triggerType === "hover" && setIsHovered(true)}
+        onBlur={() => triggerType === "hover" && setIsHovered(false)}
       >
         <TextComponent layout className={leftTextClassName}>
           {firstText}

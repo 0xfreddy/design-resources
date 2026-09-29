@@ -14,7 +14,7 @@ function Activate() {
 }
 
 export default function IntelligenceFrame({ children }: { children: ReactNode }) {
-  return <SiriProvider border={{ radius: 16, spread: 12, margin: 2 }} wave={{ strength: 0 }} noise={{ strength: 0 }} glow={{ speed: 0.24, colors: ["#FF6B9D", "#C44AFF", "#5856D6", "#00C9FF", "#FF6B9D"] }}>
+  return <SiriProvider border={{ radius: 16, spread: 12, margin: 2 }} wave={{ strength: 0 }} noise={{ strength: 0 }} glow={{ speed: 0.06, colors: ["#c99c74", "#e4bd7d", "#d6a46d", "#bf7d63", "#c99c74"] }} shimmer={{ amount: 0.18, speed: 0.5 }}>
     {children}<Activate />
   </SiriProvider>
 }

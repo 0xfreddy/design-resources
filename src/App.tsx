@@ -1,12 +1,18 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
-import { createPortal } from "react-dom"
-import { Check, Plus, X, Sun, Moon, Menu } from "lucide-react"
-import { Text } from "react-native"
+import { motion, useReducedMotion } from "framer-motion"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { X, Menu } from "lucide-react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
-import { GlobeDock, ViewMenu, useViewport } from "./ResourceControls"
-import { ArcList } from "./reaticx/arc-list"
+import { GlobeDock } from "./ResourceControls"
+import { ResourceCheckbox } from "./ResourceCheckbox"
+import { ResourceNavigation } from "./ResourceNavigation"
+import { StackBrowser } from "./StackBrowser"
+import { StackPaneSizing } from "./StackPaneSizing"
+import { JevSearch } from "./JevSearch"
+import { ShareStackDialog } from "./ShareStackDialog"
+import { RadiantAction } from "./RadiantAction"
+import { StackFlight, type StackFlightData } from "./StackFlight"
+import MediaBetweenText from "./MediaBetweenText"
 import { SplitView } from "./reaticx/split-view"
 import { categories, type Resource } from "./resources"
 
@@ -21,7 +27,6 @@ type Recommendation = {
   confidence?: number | null
 }
 
-type ViewMode = "list" | "grid"
 type PublishedStack = { id: string; name: string; handle: string; ids: string[] }
 
 type StackResource = Resource & {
@@ -82,15 +87,11 @@ function getDescription(resource: Pick<Resource, "note" | "url">, groupTitle: st
 function getInitialTheme() {
   const saved = localStorage.getItem("resource-index-theme")
   if (saved === "dark" || saved === "light") return saved
-  return "light"
+  return "dark"
 }
 
 function readStackDraft(): { ids?: string[]; name?: string; handle?: string } {
   try { return JSON.parse(localStorage.getItem("vibecooder-stack") ?? "null") ?? {} } catch { return {} }
-}
-
-function getCategoryCount(category: (typeof categories)[number]) {
-  return category.groups.reduce((total, group) => total + group.items.length, 0)
 }
 
 function getResourceId(categoryTitle: string, groupTitle: string, resource: Resource) {
@@ -104,39 +105,19 @@ function scrollToSection(sectionId: string) {
   history.replaceState(null, "", `#${sectionId}`)
 }
 
-const navItemStyle = {
-  width: "100%",
-  paddingHorizontal: 4,
-  borderRadius: 6,
-} as const
-
-const navLabelStyle = {
-  flex: 1,
-  minWidth: 0,
-  fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-  fontSize: 13,
-  fontWeight: "500",
-  lineHeight: 18,
-} as const
-
-const navCountStyle = {
-  color: "rgba(113, 109, 101, 0.72)",
-  fontFamily: "SFMono-Regular, SF Mono, monospace",
-  fontSize: 10,
-  lineHeight: 18,
-} as const
-
 function IntroCopy() {
   return (
-    <p>
-      all the best libraries/tools i've found on x, reddit and dms
-      <span>
-        for daily feed:{" "}
+    <>
+      <p>all the best libraries/tools i've found on x, reddit and dms</p>
+      <div className="daily-feed-line">
+        <span>for daily feed:</span>
         <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">
-          tested
+          <MediaBetweenText firstText="tested" secondText="in prod" mediaUrl="/tested-in-prod.jpeg" mediaType="image" triggerType="hover" as="span"
+            alt="Tested in prod" className="media-between-text" mediaContainerClassName="daily-feed-media"
+            animationVariants={{ initial: { width: 0, opacity: 1 }, animate: { width: 28, opacity: 1, transition: { type: "spring", duration: 0.4, bounce: 0 } } }} />
         </a>
-      </span>
-    </p>
+      </div>
+    </>
   )
 }
 
@@ -155,60 +136,74 @@ function ResourceItem({
 }) {
   return (
     <li className={`${selected ? "selected" : ""}${onToggleStack ? " stackable" : ""}`}>
-      {onToggleStack && (
-        <button type="button" className="stack-pick" onClick={(event) => onToggleStack(event.currentTarget)}
-          aria-label={`${selected ? "Remove" : "Add"} ${resource.name} ${selected ? "from" : "to"} your stack`}
-          title={selected ? "Remove from stack" : "Add to stack"} aria-pressed={selected}>
-          {selected ? <Check size={17} /> : <Plus size={17} />}
-        </button>
-      )}
       <LinkPreview href={resource.url} name={resource.name} description={getDescription(resource, groupTitle)} category={groupTitle} selected={selected} onToggleStack={onToggleStack}>
         <motion.span className="resource-logo" aria-hidden="true">
           <img src={getLogoUrl(resource.url)} alt="" loading="lazy" decoding="async" />
         </motion.span>
         <span className="resource-copy">
           <span className="name">{resource.name}</span>
-          <span className="description">{getDescription(resource, groupTitle)}</span>
+          {resource.note && <span className="description">{resource.note}</span>}
         </span>
         <span className="domain">{meta ?? getDomain(resource.url)}</span>
         <span className="arrow" aria-hidden="true">↗</span>
       </LinkPreview>
+      {onToggleStack && <ResourceCheckbox name={resource.name} checked={selected} onChange={onToggleStack} />}
     </li>
   )
 }
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme)
-  const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [activeSection, setActiveSection] = useState(slugify(categories[0].title))
   const [navigationOpen, setNavigationOpen] = useState(false)
   const [prompt, setPrompt] = useState("")
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
   const [recommendationMessage, setRecommendationMessage] = useState("")
   const [selectedStack, setSelectedStack] = useState<string[]>(() => { const ids = readStackDraft().ids; return Array.isArray(ids) ? ids.filter(id => typeof id === "string") : [] })
-  const [stackName, setStackName] = useState(() => { const name = readStackDraft().name; return typeof name === "string" ? name : "" })
+  const [stackName] = useState(() => { const name = readStackDraft().name; return typeof name === "string" ? name : "" })
   const [stackHandle, setStackHandle] = useState(() => { const handle = readStackDraft().handle; return typeof handle === "string" ? handle : "" })
   const [peopleStacks, setPeopleStacks] = useState<PublishedStack[]>([])
   const [publishing, setPublishing] = useState(false)
   const [stackMessage, setStackMessage] = useState("")
-  const [flight, setFlight] = useState<{ key: number; url: string; from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [publicStack, setPublicStack] = useState<PublishedStack | null>(null)
+  const [shareLoadError, setShareLoadError] = useState("")
+  const [flights, setFlights] = useState<StackFlightData[]>([])
+  const flightKey = useRef(0)
   const stackTarget = useRef<HTMLDivElement>(null)
+  const splitContainer = useRef<HTMLDivElement>(null)
+  const [splitHeight, setSplitHeight] = useState(600)
   const reducedMotion = useReducedMotion()
-  const viewport = useViewport()
-  const splitHeight = Math.max(500, viewport.height - 250)
-  const navColors = theme === "dark" ? { normal: "#aaa9a4", active: "#f5f5f2" } : { normal: "#767671", active: "#181713" }
+  useLayoutEffect(() => {
+    const observer = new ResizeObserver(() => setSplitHeight(splitContainer.current?.clientHeight || 600))
+    if (splitContainer.current) observer.observe(splitContainer.current)
+    return () => observer.disconnect()
+  }, [])
 
-  const granularGroups = useMemo(
-    () =>
-      categories.flatMap((category) =>
-        category.groups.map((group) => ({
-          category,
-          group,
-          sectionId: getGroupId(category.title, group.title),
-        })),
-      ),
-    [],
-  )
+  useEffect(() => {
+    const directory = document.querySelector<HTMLElement>(".directory")
+    const pane = directory?.parentElement
+    if (!pane || !directory) return
+    let frame = 0
+    const update = () => {
+      const edge = pane.getBoundingClientRect().top + 64
+      const sections = [...directory.querySelectorAll<HTMLElement>(".category, .resource-group")]
+      let current = sections[0]?.id
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top > edge) break
+        current = section.id
+      }
+      if (current) setActiveSection(current)
+    }
+    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update) }
+    pane.addEventListener("scroll", schedule, { passive: true })
+    const observer = new ResizeObserver(schedule)
+    observer.observe(pane)
+    observer.observe(directory)
+    update()
+    return () => { pane.removeEventListener("scroll", schedule); observer.disconnect(); cancelAnimationFrame(frame) }
+  }, [])
 
   const flatResources = useMemo<StackResource[]>(
     () =>
@@ -230,11 +225,12 @@ export default function App() {
     .filter((resource): resource is StackResource => Boolean(resource))
 
   const toggleStackResource = (resourceId: string, source?: HTMLElement) => {
-    if (!selectedStack.includes(resourceId) && source && stackTarget.current && !reducedMotion) {
-      const from = source.closest("li")?.querySelector(".resource-logo")?.getBoundingClientRect() ?? source.getBoundingClientRect()
-      const to = stackTarget.current.getBoundingClientRect()
+    if (!selectedStack.includes(resourceId) && source && !reducedMotion) {
+      const from = source.closest("li")?.querySelector(".resource-logo img")?.getBoundingClientRect() ?? source.getBoundingClientRect()
       const resource = flatResources.find(item => item.id === resourceId)
-      if (resource) setFlight({ key: Date.now(), url: getLogoUrl(resource.url), from: { x: from.x, y: from.y }, to: { x: to.x + 14, y: to.y + 14 } })
+      if (resource) setFlights(current => [...current, { key: ++flightKey.current, id: resourceId, url: getLogoUrl(resource.url), from: { x: from.x, y: from.y, width: from.width, height: from.height } }])
+    } else if (selectedStack.includes(resourceId)) {
+      setFlights(current => current.filter(flight => flight.id !== resourceId))
     }
     setSelectedStack((current) =>
       current.includes(resourceId) ? current.filter((id) => id !== resourceId) : [...current, resourceId],
@@ -253,15 +249,29 @@ export default function App() {
     return () => controller.abort()
   }, [])
 
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get("stack")
+    if (!id) return
+    const controller = new AbortController()
+    fetch(`/api/stacks?id=${encodeURIComponent(id)}`, { signal: controller.signal }).then(async response => {
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Could not load shared stack")
+      setPublicStack(data.stack)
+    }).catch(error => { if (!controller.signal.aborted) setShareLoadError(error.message) })
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => { if (selectedStack.length) stackTarget.current?.parentElement?.scrollTo({ top: 0 }) }, [selectedStack.length])
+
   const publishStack = async () => {
     setPublishing(true)
     setStackMessage("")
     try {
-      const response = await fetch("/api/stacks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: stackName, handle: stackHandle, ids: selectedStack }) })
+      const response = await fetch("/api/stacks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: stackName.trim() || stackHandle.trim().replace(/^@/, ""), handle: stackHandle, ids: selectedStack }) })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Could not publish stack")
       setPeopleStacks(current => [data.stack, ...current.filter(item => item.id !== data.stack.id)])
-      setStackMessage("Stack published")
+      return data.stack as PublishedStack
     } catch (error) { setStackMessage(error instanceof Error ? error.message : "Could not publish stack") }
     finally { setPublishing(false) }
   }
@@ -272,10 +282,9 @@ export default function App() {
     localStorage.setItem("resource-index-theme", theme)
   }, [theme])
 
-  const requestRecommendations = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const requestRecommendations = async () => {
     const query = prompt.trim()
-    if (!query) return
+    if (!query || recommendationStatus === "loading") return
 
     setRecommendationStatus("loading")
     setRecommendationMessage("")
@@ -292,10 +301,12 @@ export default function App() {
       if (!response.ok) throw new Error(data.error ?? "Jev could not rank the resources.")
 
       setRecommendationStatus("ready")
-      setRecommendationMessage(data.provider === "jev" ? "ranked by jev" : "ranked locally")
+      setRecommendationMessage(data.picks?.length ? "" : "No matching resources found.")
     } catch (error) {
       setRecommendationStatus("error")
       setRecommendationMessage(error instanceof Error ? error.message : "Jev could not rank the resources.")
+    } finally {
+      document.querySelector(".directory")?.parentElement?.scrollTo({ top: 0 })
     }
   }
 
@@ -309,12 +320,24 @@ export default function App() {
 
       <div className="app-shell">
         <aside className="side-panel" aria-label="Resource navigation" data-mobile-open={navigationOpen}>
-          <a className="brand" href="#top" aria-label="Back to top">
+          <div className="side-heading">
+          <a className="brand" href="#top" aria-label="Back to top" onClick={event => { event.preventDefault(); document.querySelector(".directory")?.parentElement?.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" }) }}>
             <span className="brand-mark">vr</span>
             <span>vibecooder.dev</span>
           </a>
           <button className="icon-button mobile-navigation-toggle" aria-label="Browse categories" title="Browse categories" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}>{navigationOpen ? <X size={18} /> : <Menu size={18} />}</button>
 
+          <header className="page-heading">
+            <div className="page-heading-copy">
+              <h1><span>{resourceCount}</span> vibe resources</h1>
+              <p className="headline-kicker">for your next project</p>
+            </div>
+          </header>
+          </div>
+
+          <ResourceNavigation dark={theme === "dark"} activeId={activeSection} navigate={id => { scrollToSection(id); setNavigationOpen(false) }} />
+
+          <div className="side-about">
           <div className="side-intro">
             <IntroCopy />
           </div>
@@ -332,111 +355,25 @@ export default function App() {
               sponsor this slot ↗
             </a>
           </div>
-
-          <div className="side-nav-shell" aria-label="Categories">
-            <span className="side-label">Navigation</span>
-            <div className="side-nav arc-list-nav">
-              <ArcList.Root
-                height={210}
-                itemHeight={44}
-                side="left"
-                sweep={16}
-                defaultIndex={2}
-                minOpacity={0.35}
-                minScale={0.86}
-                style={{ flex: 0 }}
-              >
-                <ArcList.Viewport>
-                {categories.map((category) => {
-                  const sectionId = slugify(category.title)
-
-                  return (
-                    <ArcList.Item
-                      key={category.title}
-                      onPress={() => { scrollToSection(sectionId); setNavigationOpen(false) }}
-                      style={navItemStyle}
-                    >
-                      <ArcList.Indicator size={10} color={navColors.normal} activeColor={navColors.active} />
-                      <ArcList.Label color={navColors.normal} activeColor={navColors.active} style={navLabelStyle}>{["UI Components", "Motion & Interaction", "Visuals & Backgrounds", "Icons, Type & Assets", "Inspiration & Tools"][categories.indexOf(category)]}</ArcList.Label>
-                      <Text style={[navCountStyle, { color: navColors.normal }]}>{getCategoryCount(category)}</Text>
-                    </ArcList.Item>
-                  )
-                })}
-                </ArcList.Viewport>
-              </ArcList.Root>
-            </div>
-          </div>
-
-          <div className="side-nav-shell granular-nav" aria-label="Resource sections">
-            <span className="side-label">Sections</span>
-            <div className="side-nav arc-list-nav">
-              <ArcList.Root
-                height={200}
-                itemHeight={40}
-                side="left"
-                sweep={16}
-                minOpacity={0.35}
-                minScale={0.86}
-                style={{ flex: 0 }}
-              >
-                <ArcList.Viewport>
-                  {granularGroups.map(({ category, group, sectionId }) => {
-
-                    return (
-                      <ArcList.Item
-                        key={`${category.title}-${group.title}`}
-                        onPress={() => { scrollToSection(sectionId); setNavigationOpen(false) }}
-                        style={navItemStyle}
-                      >
-                        <ArcList.Label color={navColors.normal} activeColor={navColors.active} style={navLabelStyle}>{group.title}</ArcList.Label>
-                        <Text style={[navCountStyle, { color: navColors.normal }]}>{group.items.length}</Text>
-                      </ArcList.Item>
-                    )
-                  })}
-                </ArcList.Viewport>
-              </ArcList.Root>
-            </div>
           </div>
 
         </aside>
 
         <main id="top">
-          <header className="page-heading">
-            <div className="page-heading-copy">
-              <h1><span>{resourceCount}</span> vibe resources</h1>
-              <p className="headline-kicker">for your next project</p>
-            </div>
-
-            <div className="heading-tools">
-              <button className="icon-button" aria-label="Toggle color theme" title="Toggle color theme" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon size={18} /> : <Sun size={18} />}</button>
-              <ViewMenu value={viewMode} onChange={setViewMode} />
-            </div>
-          </header>
-
         <section className="recommender" aria-labelledby="recommender-title">
-          <form onSubmit={requestRecommendations}>
-            <label htmlFor="resource-prompt" id="recommender-title">
-              what are you building?
-            </label>
-            <div className="prompt-row">
-              <input
-                id="resource-prompt"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                placeholder="glassy saas landing page, animated icons, mobile onboarding..."
-              />
-              {prompt.trim() && (
-                <button type="submit" disabled={recommendationStatus === "loading"}>
-                  {recommendationStatus === "loading" ? "…" : "pick resources"}
-                </button>
-              )}
-            </div>
-          </form>
+          <JevSearch query={prompt} onChange={setPrompt} onPick={() => void requestRecommendations()} loading={recommendationStatus === "loading"} dark={theme === "dark"} />
+        </section>
+
+        <div className="split-builder" ref={splitContainer}>
+        <SplitView initialTopHeight={splitHeight - 22 - (selectedResources.length ? 244 : 94)} minTopHeight={Math.min(180, Math.max(60, splitHeight - 267))} minBottomHeight={selectedResources.length ? Math.min(244, splitHeight - 83) : 94} gap={22} style={{ flex: 0, height: splitHeight, backgroundColor: "var(--paper)" }}>
+          <StackPaneSizing selected={selectedResources.length > 0} height={splitHeight} />
+          <SplitView.Top style={{ overflow: "scroll", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)", overscrollBehavior: "contain" } as any}>
+            <div className="directory">
 
           {(recommendations.length > 0 || recommendationMessage) && (
             <div className="recommendation-results">
               <div className="recommendation-heading">
-                <h2>jev picks</h2>
+                <h2>Jev Picks</h2>
                 {recommendationMessage && <span>{recommendationMessage}</span>}
               </div>
 
@@ -452,21 +389,13 @@ export default function App() {
                         const match = flatResources.find(item => item.url === resource.url)
                         if (match) toggleStackResource(match.id, element)
                       }}
-                      meta={`${resource.group}${
-                        typeof resource.probability === "number" ? ` · ${Math.round(resource.probability * 100)}%` : ""
-                      }`}
+                      meta={resource.group}
                     />
                   ))}
                 </ol>
               )}
             </div>
           )}
-        </section>
-
-        <div className="split-builder">
-        <SplitView initialTopHeight={Math.round(splitHeight * 0.58)} minTopHeight={180} minBottomHeight={190} gap={22} style={{ flex: 0, height: splitHeight, backgroundColor: "var(--paper)" }}>
-          <SplitView.Top style={{ overflow: "scroll", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)" }}>
-            <div className="directory">
               {categories.map((category) => (
                 <section className="category" id={slugify(category.title)} key={category.title}>
                   <div className="category-heading">
@@ -478,7 +407,8 @@ export default function App() {
 
                   {category.groups.map((group) => (
                     <div className="resource-group" id={getGroupId(category.title, group.title)} key={group.title}>
-                      <ol className={`resource-list ${viewMode}`}>
+                      <h3 className="group-title">{group.title}</h3>
+                      <ol className="resource-list list">
                         {group.items.map((resource) => {
                           const resourceId = getResourceId(category.title, group.title, resource)
 
@@ -499,65 +429,15 @@ export default function App() {
               ))}
             </div>
           </SplitView.Top>
-          <SplitView.Handle color="var(--muted)" style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: "var(--line)", cursor: "row-resize" } as any} />
+          <SplitView.Handle color="var(--split-handle)" style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: "var(--line)", cursor: "row-resize" } as any} />
           <SplitView.Bottom style={{ overflow: "scroll", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)" }}>
             <div className="split-pane-heading" ref={stackTarget}>
               <span>people stacks</span>
               <small aria-live="polite">{selectedResources.length} selected</small>
             </div>
-            <div className="stack-owner">
-              <input
-                value={stackName}
-                onChange={(event) => setStackName(event.target.value)}
-                placeholder="your name"
-                aria-label="Your name"
-                maxLength={80}
-              />
-              <input
-                value={stackHandle}
-                onChange={(event) => setStackHandle(event.target.value)}
-                placeholder="@twitter"
-                aria-label="Twitter handle"
-                maxLength={16}
-              />
-            </div>
-            <div className="stack-board">
-              {selectedResources.length === 0 ? (
-                <p>Your stack is empty.</p>
-              ) : (
-                <motion.ol layout className="stack-list">
-                  <AnimatePresence initial={false}>
-                    {selectedResources.map((resource) => (
-                      <motion.li
-                        layout
-                        key={resource.id}
-                        initial={{ opacity: 0, y: 22, scale: 0.92, filter: "blur(8px)" }}
-                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, x: 28, scale: 0.96, filter: "blur(5px)" }}
-                        transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}
-                      >
-                        <motion.span className="stack-logo">
-                          <img src={getLogoUrl(resource.url)} alt="" />
-                        </motion.span>
-                        <span>
-                          <strong>{resource.name}</strong>
-                          <small>{resource.groupTitle}</small>
-                        </span>
-                        <button type="button" title="Remove from stack" aria-label={`Remove ${resource.name} from your stack`} onClick={() => toggleStackResource(resource.id)}>
-                          <X size={16} />
-                        </button>
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </motion.ol>
-              )}
-            </div>
-            <div className="stack-signature">
-              <span>{stackName || "anonymous builder"}</span>
-              <small>{stackHandle || "@handle"}</small>
-              <button className="publish-stack" disabled={publishing || !stackName.trim() || selectedResources.length === 0} onClick={publishStack}>{publishing ? "Publishing..." : "Publish stack"}</button>
-            </div>
-            {stackMessage && <p className="stack-status" role="status">{stackMessage}</p>}
+            <StackBrowser resources={selectedResources} remove={toggleStackResource} flyingIds={flights.map(flight => flight.id)} />
+            {selectedResources.length > 0 && <div className="stack-share-action"><RadiantAction label="Share the stack" onPress={() => { setStackMessage(""); setShareOpen(true) }} /></div>}
+            {shareLoadError && <p role="alert">{shareLoadError}</p>}
             {peopleStacks.length > 0 && <div className="people-stacks">
               {peopleStacks.map(stack => <article key={stack.id} className="published-stack">
                 <div className="published-owner"><strong>{stack.name}</strong>{stack.handle && <a href={`https://x.com/${encodeURIComponent(stack.handle)}`} target="_blank" rel="noreferrer">@{stack.handle}</a>}</div>
@@ -578,8 +458,10 @@ export default function App() {
         </footer>
       </main>
       </div>
+      {shareOpen && <ShareStackDialog resources={selectedResources} handle={stackHandle} setHandle={setStackHandle} close={() => setShareOpen(false)} publish={publishStack} publishing={publishing} error={stackMessage} />}
+      {publicStack && <ShareStackDialog resources={publicStack.ids.map(id => flatResources.find(resource => resource.id === id)).filter((resource): resource is StackResource => Boolean(resource))} handle={publicStack.handle} sharedId={publicStack.id} close={() => { setPublicStack(null); const url = new URL(location.href); url.searchParams.delete("stack"); history.replaceState(null, "", url) }} />}
       <GlobeDock dark={theme === "dark"} />
-      {flight && createPortal(<motion.img key={flight.key} className="stack-flight" src={flight.url} alt="" initial={{ x: flight.from.x, y: flight.from.y, opacity: 1, scale: 1 }} animate={{ x: flight.to.x, y: flight.to.y, opacity: [1, 1, 0], scale: [1, 1.25, 0.7] }} transition={{ type: "spring", duration: 0.65, bounce: 0.1 }} onAnimationComplete={() => setFlight(null)} />, document.body)}
+      {flights.map(flight => <StackFlight key={flight.key} flight={flight} onLand={key => setFlights(current => current.filter(item => item.key !== key))} />)}
     </>
   )
 }

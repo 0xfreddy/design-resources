@@ -130,20 +130,18 @@ export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, classNa
       window.setTimeout(() => canvas && (canvas.style.opacity = "1"))
     }
 
-    if (canvas.offsetWidth > 0) {
-      init()
-    } else {
-      const observer = new ResizeObserver((entries) => {
-        if (entries[0]?.contentRect.width > 0) {
-          observer.disconnect()
-          init()
-        }
-      })
-      observer.observe(canvas)
-    }
+    init()
+    const observer = new ResizeObserver(() => {
+      const width = canvas.offsetWidth
+      if (!width) return
+      if (!globe) init()
+      else globe.update({ width, height: width })
+    })
+    observer.observe(canvas)
 
     return () => {
       if (animationId) cancelAnimationFrame(animationId)
+      observer.disconnect()
       globe?.destroy()
     }
   }, [markers, arcs, speed, dark])
