@@ -48,6 +48,7 @@ export const SiriProvider: React.FC<IAppleIntelligenceProvider> &
       height: 0,
     });
     const busyRef = useRef<boolean>(false);
+    const mountedRef = useRef(true);
 
     const [overlayContent, setOverlayContent] = useState<React.ReactNode>(null);
 
@@ -63,6 +64,7 @@ export const SiriProvider: React.FC<IAppleIntelligenceProvider> &
     });
 
     useEffect(() => () => {
+      mountedRef.current = false;
       frameCallback.setActive(false);
       cancelAnimation(intensity);
       cancelAnimation(overlayOpacity);
@@ -120,6 +122,10 @@ export const SiriProvider: React.FC<IAppleIntelligenceProvider> &
 
         try {
           const image = await makeImageFromView(viewRef as Parameters<typeof makeImageFromView>[0], snapshotView);
+          if (!mountedRef.current) {
+            image?.dispose();
+            return;
+          }
           if (!image) {
             busyRef.current = false;
             return;
