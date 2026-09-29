@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
+        "@": resolve(rootDir, "src"),
         "react-native": "react-native-web",
         "react-native-gesture-handler": resolve(
           rootDir,

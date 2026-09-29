@@ -31,7 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
-import { createCompoundComponent } from "../../utils/create-compound-component";
+import { createCompoundComponent } from "@/utils/create-compound-component";
 
 import {
   CENTRE_Z,
@@ -488,11 +488,11 @@ const styles = StyleSheet.create({
   itemLeft: {
     alignItems: "flex-start",
     transformOrigin: "0% 50%",
-  } as ViewStyle,
+  },
   itemRight: {
     alignItems: "flex-end",
     transformOrigin: "100% 50%",
-  } as ViewStyle,
+  },
   press: {
     flexDirection: "row",
     alignItems: "center",

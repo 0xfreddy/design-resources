@@ -38,7 +38,7 @@ import type {
   ISplitViewTitle,
 } from "./types";
 import { scheduleOnRN } from "react-native-worklets";
-import { createCompoundComponent } from "../../utils/create-compound-component";
+import { createCompoundComponent } from "@/utils/create-compound-component";
 
 const SplitViewRoot: React.FC<ISplitViewRoot> &
   React.FunctionComponent<ISplitViewRoot> = ({
@@ -65,9 +65,7 @@ const SplitViewRoot: React.FC<ISplitViewRoot> &
   const minTop = minTopHeight;
   const maxTop =
     maxTopHeight ??
-    (containerHeight > 0
-      ? Math.max(minTop + 1, containerHeight - gap - minBottomHeight)
-      : Math.max(initialTopHeight, minTop + 1));
+    Math.max(minTop + 1, containerHeight - gap - minBottomHeight);
 
   const resolvedSnapPoints = useMemo<number[]>(() => {
     if (snapPoints && snapPoints.length > 0) {
@@ -82,7 +80,7 @@ const SplitViewRoot: React.FC<ISplitViewRoot> &
     if (bounded !== topHeight.value) {
       topHeight.value = withSpring(bounded, springConfig);
     }
-  }, [containerHeight, minTop, maxTop, springConfig, topHeight]);
+  }, [containerHeight, minTop, maxTop]);
 
   const gesture = useMemo(
     () =>
@@ -262,11 +260,6 @@ export {
   SplitViewHandle,
   SplitViewBottom,
   SplitViewTitle,
-  Root,
-  Top,
-  Bottom,
-  Handle,
-  Title,
 };
 
 const styles = StyleSheet.create({
@@ -308,5 +301,3 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
 });
-
-export default SplitView;

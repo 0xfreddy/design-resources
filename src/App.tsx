@@ -500,7 +500,7 @@ export default function App() {
         </section>
 
         <div className="split-builder">
-        <SplitView initialTopHeight={560} minTopHeight={360} minBottomHeight={250} gap={18} style={{ minHeight: 820, height: 820 }}>
+        <SplitView initialTopHeight={560} minTopHeight={360} minBottomHeight={250} maxTopHeight={560} gap={18} style={{ minHeight: 820, height: 820 }}>
           <SplitView.Top style={{ overflow: "scroll", paddingRight: 8 }}>
             <div className="directory">
               {categories.map((category) => (

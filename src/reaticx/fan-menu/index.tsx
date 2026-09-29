@@ -27,7 +27,6 @@ import Animated, {
   type WithSpringConfig,
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
-import { BlurView, type BlurViewProps } from "expo-blur";
 import { FanContext, useFan } from "./context";
 import {
   DEFAULT_BUTTON_SIZE,
@@ -55,6 +54,7 @@ import type {
   IFanTrigger,
   IResolvedConfig,
 } from "./types";
+import { BlurView, type BlurViewProps } from "expo-blur";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
@@ -164,7 +164,7 @@ const FanRoot: React.FC<IFanMenu> & React.FunctionComponent<IFanMenu> =
           );
           onClose?.();
         }
-      }, [isOpen, order.length, stagger, springConfig, onOpen, onClose, progress]);
+      }, [isOpen]);
 
       const contextValue = useMemo(
         () => ({
@@ -482,6 +482,7 @@ const styles = StyleSheet.create({
   itemAnchor: {
     position: "absolute",
     zIndex: 1,
+
     width: SCREEN_W,
     alignItems: "flex-start",
   },

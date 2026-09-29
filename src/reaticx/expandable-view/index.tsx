@@ -31,7 +31,7 @@ import type {
   IExpandableRoot,
   IExpandableSlot,
 } from "./types";
-import { createCompoundComponent } from "../../utils/create-compound-component";
+import { createCompoundComponent } from "@/utils/create-compound-component";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -177,13 +177,13 @@ const ExpandableClose: React.FC<IExpandableClose> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#d6d6d6",
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   collapsed: {
-    ...(StyleSheet as any).absoluteFillObject,
+    ...StyleSheet.absoluteFillObject,
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
