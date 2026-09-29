@@ -2,6 +2,8 @@ import { createReadStream, existsSync } from "node:fs"
 import { createServer } from "node:http"
 import { extname, join, normalize, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { pipeline } from "node:stream"
+import { createGzip } from "node:zlib"
 import { createRecommendHandler } from "./recommend.mjs"
 import { createLiveUsersHandler } from "./live-users.mjs"
 import { createStacksHandler } from "./stacks.mjs"
@@ -48,7 +50,20 @@ function sendStatic(req, res) {
 
   res.statusCode = 200
   res.setHeader("Content-Type", mimeTypes[extname(filePath)] ?? "application/octet-stream")
-  createReadStream(filePath).pipe(res)
+  res.setHeader("Cache-Control", filePath.startsWith(join(distDir, "assets") + "/") ? "public, max-age=31536000, immutable" : "no-cache")
+  const compressible = [".js", ".css", ".html", ".json", ".svg", ".wasm"].includes(extname(filePath))
+  if (compressible) res.setHeader("Vary", "Accept-Encoding")
+  const gzip = compressible && String(req.headers["accept-encoding"] ?? "").split(",").some(value => {
+    const [encoding, ...parameters] = value.trim().split(";")
+    const quality = parameters.find(parameter => parameter.trim().startsWith("q="))
+    return encoding === "gzip" && (quality === undefined || Number(quality.trim().slice(2)) > 0)
+  })
+  if (gzip) res.setHeader("Content-Encoding", "gzip")
+  if (req.method === "HEAD") { res.end(); return }
+  const stream = createReadStream(filePath)
+  const onDone = error => { if (error) res.destroy(error) }
+  if (gzip) pipeline(stream, createGzip(), res, onDone)
+  else pipeline(stream, res, onDone)
 }
 
 const server = createServer((req, res) => {
@@ -80,5 +95,5 @@ const server = createServer((req, res) => {
 })
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`design resources listening on ${port}`)
+  console.log(`design resources listening on ${server.address().port}`)
 })
