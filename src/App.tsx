@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
-import { ArcListNav, ExpandableView, FanMenu, LiveUsersGlobe } from "./ReaticxPrimitives"
+import { ArcList, ExpandableView, FanMenu, GlobeCdn, SplitView } from "./ReaticxPrimitives"
 import { categories, type Resource } from "./resources"
 
 type Recommendation = {
@@ -85,6 +85,11 @@ function getCategoryCount(category: (typeof categories)[number]) {
 
 function getResourceId(categoryTitle: string, groupTitle: string, resource: Resource) {
   return `${slugify(categoryTitle)}-${slugify(groupTitle)}-${slugify(resource.name)}`
+}
+
+function scrollToSection(sectionId: string) {
+  document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  history.replaceState(null, "", `#${sectionId}`)
 }
 
 function IntroCopy() {
@@ -266,46 +271,70 @@ export default function App() {
             </a>
           </div>
 
-          <ArcListNav label="Categories">
+          <div className="side-nav-shell" aria-label="Categories">
             <span className="side-label">Navigation</span>
-            {categories.map((category) => (
-              <a
-                key={category.title}
-                href={`#${slugify(category.title)}`}
-                className={activeSection.startsWith(slugify(category.title)) ? "active" : ""}
-              >
-                <span>{category.title}</span>
-                <small>{getCategoryCount(category)}</small>
-              </a>
-            ))}
-          </ArcListNav>
+            <ArcList.Root className="side-nav arc-list-nav" height={176} itemHeight={34} side="left" sweep={26} minOpacity={0.68} minScale={0.96}>
+              <ArcList.Viewport>
+                {categories.map((category) => {
+                  const sectionId = slugify(category.title)
 
-          <ArcListNav label="Resource sections">
+                  return (
+                    <ArcList.Item
+                      key={category.title}
+                      className={activeSection.startsWith(sectionId) ? "active" : ""}
+                      onPress={() => scrollToSection(sectionId)}
+                    >
+                      <ArcList.Label>{category.title}</ArcList.Label>
+                      <small>{getCategoryCount(category)}</small>
+                    </ArcList.Item>
+                  )
+                })}
+              </ArcList.Viewport>
+            </ArcList.Root>
+          </div>
+
+          <div className="side-nav-shell granular-nav" aria-label="Resource sections">
             <span className="side-label">Sections</span>
-            {categories.flatMap((category) =>
-              category.groups.map((group) => (
-                <a
-                  key={`${category.title}-${group.title}`}
-                  href={`#${getGroupId(category.title, group.title)}`}
-                  className={activeSection === getGroupId(category.title, group.title) ? "active" : ""}
-                >
-                  <span>{group.title}</span>
-                  <small>{group.items.length}</small>
-                </a>
-              )),
-            )}
-          </ArcListNav>
+            <ArcList.Root className="side-nav arc-list-nav" height={300} itemHeight={31} side="left" sweep={22} minOpacity={0.58} minScale={0.94}>
+              <ArcList.Viewport>
+                {categories.flatMap((category) =>
+                  category.groups.map((group) => {
+                    const sectionId = getGroupId(category.title, group.title)
+
+                    return (
+                      <ArcList.Item
+                        key={`${category.title}-${group.title}`}
+                        className={activeSection === sectionId ? "active" : ""}
+                        onPress={() => scrollToSection(sectionId)}
+                      >
+                        <ArcList.Label>{group.title}</ArcList.Label>
+                        <small>{group.items.length}</small>
+                      </ArcList.Item>
+                    )
+                  }),
+                )}
+              </ArcList.Viewport>
+            </ArcList.Root>
+          </div>
 
           <div className="globe-dock">
             <ExpandableView
-              preview={
-                <>
+              collapsedWidth={220}
+              expandedWidth={380}
+              collapsedHeight={42}
+              expandedHeight={430}
+            >
+              <ExpandableView.Collapsed>
+                <span className="expandable-trigger-copy">
                   <span>live users</span>
                   <strong>{selectedStack.length || "geo"}</strong>
-                </>
-              }
-            >
-              <LiveUsersGlobe />
+                </span>
+              </ExpandableView.Collapsed>
+              <ExpandableView.Expanded>
+                <ExpandableView.Close />
+                <GlobeCdn className="live-globe" />
+                <p className="globe-note">PostHog geo stream ready. Connect a server key to swap these live markers from analytics.</p>
+              </ExpandableView.Expanded>
             </ExpandableView>
           </div>
         </aside>
@@ -317,14 +346,23 @@ export default function App() {
               <p className="headline-kicker">for your next project</p>
             </div>
 
-            <FanMenu
-              value={viewMode}
-              onChange={setViewMode}
-              items={[
-                { value: "list", label: "list" },
-                { value: "grid", label: "grid" },
-              ]}
-            />
+            <FanMenu direction="up" itemDirection="clockwise" buttonSize={42}>
+              <FanMenu.Item
+                value="list"
+                onPress={(value) => setViewMode((value ?? "list") as ViewMode)}
+                className={viewMode === "list" ? "active" : ""}
+              >
+                <FanMenu.Label>list</FanMenu.Label>
+              </FanMenu.Item>
+              <FanMenu.Item
+                value="grid"
+                onPress={(value) => setViewMode((value ?? "grid") as ViewMode)}
+                className={viewMode === "grid" ? "active" : ""}
+              >
+                <FanMenu.Label>grid</FanMenu.Label>
+              </FanMenu.Item>
+              <FanMenu.Trigger>{viewMode}</FanMenu.Trigger>
+            </FanMenu>
           </header>
 
         <section className="recommender" aria-labelledby="recommender-title">
@@ -372,8 +410,8 @@ export default function App() {
           )}
         </section>
 
-        <section className="split-builder" aria-label="Resources and stack builder">
-          <div className="split-pane split-pane-resources">
+        <SplitView className="split-builder" initialTopHeight={560} minTopHeight={360} minBottomHeight={250} gap={18}>
+          <SplitView.Top className="split-pane-resources">
             <div className="split-pane-heading">
               <span>all resources</span>
               <small>{resourceCount} tools</small>
@@ -410,11 +448,9 @@ export default function App() {
                 </section>
               ))}
             </div>
-          </div>
-          <div className="split-handle" aria-hidden="true">
-            <span />
-          </div>
-          <div className="split-pane split-pane-stack">
+          </SplitView.Top>
+          <SplitView.Handle />
+          <SplitView.Bottom className="split-pane-stack">
             <div className="split-pane-heading">
               <span>people stacks</span>
               <small>{selectedResources.length} selected</small>
@@ -468,8 +504,8 @@ export default function App() {
               <span>{stackName || "anonymous builder"}</span>
               <small>{stackHandle || "@handle"}</small>
             </div>
-          </div>
-        </section>
+          </SplitView.Bottom>
+        </SplitView>
 
         <footer>
           <span>
