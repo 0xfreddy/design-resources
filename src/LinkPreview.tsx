@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react"
+import { AppleIntelligenceFrame } from "./ReaticxPrimitives"
 
 type LinkPreviewProps = {
   href: string
@@ -29,6 +30,8 @@ function warmPreview(src: string) {
 
 export function LinkPreview({ href, children }: LinkPreviewProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isPreviewHovered, setIsPreviewHovered] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [isTouch, setIsTouch] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
@@ -80,15 +83,16 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
       </a>
 
       <AnimatePresence>
-        {isHovered && (
+        {(isHovered || isPreviewHovered) && (
           <motion.aside
             className="site-preview"
             style={{ x: previewPosition.x, y: previewPosition.y }}
+            onMouseEnter={() => setIsPreviewHovered(true)}
+            onMouseLeave={() => setIsPreviewHovered(false)}
             initial={{ opacity: 0, scale: 0.985, filter: "blur(4px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, scale: 0.985, filter: "blur(3px)" }}
             transition={{ type: "spring", bounce: 0, duration: 0.24 }}
-            aria-hidden="true"
           >
             <div className="preview-bar">
               <img src={getLogoUrl(href)} alt="" />
@@ -113,7 +117,55 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
                 }}
               />
             </div>
+            <div className="preview-actions">
+              <span>
+                <img src={getLogoUrl(href)} alt="" />
+                {domain}
+              </span>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault()
+                  setIsExpanded(true)
+                  setIsHovered(false)
+                  setIsPreviewHovered(false)
+                }}
+              >
+                expand
+              </button>
+            </div>
           </motion.aside>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            className="preview-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <AppleIntelligenceFrame className="preview-modal">
+              <button type="button" className="preview-modal-close" onClick={() => setIsExpanded(false)}>
+                close
+              </button>
+              <div className="preview-modal-frame">
+                <img src={previewUrl} alt="" />
+              </div>
+              <div className="preview-modal-footer">
+                <span>
+                  <img src={getLogoUrl(href)} alt="" />
+                  <strong>{domain}</strong>
+                  <small>preview opened inside vibecooder.dev</small>
+                </span>
+                <a href={href} target="_blank" rel="noreferrer">
+                  Visit site ↗
+                </a>
+              </div>
+            </AppleIntelligenceFrame>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

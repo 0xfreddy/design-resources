@@ -1,6 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
+import { ArcListNav, ExpandableView, FanMenu, LiveUsersGlobe } from "./ReaticxPrimitives"
 import { categories, type Resource } from "./resources"
 
 type Recommendation = {
@@ -15,6 +17,12 @@ type Recommendation = {
 }
 
 type ViewMode = "list" | "grid"
+
+type StackResource = Resource & {
+  id: string
+  groupTitle: string
+  categoryTitle: string
+}
 
 const resourceCount = categories.reduce(
   (total, category) => total + category.groups.reduce((groupTotal, group) => groupTotal + group.items.length, 0),
@@ -75,6 +83,10 @@ function getCategoryCount(category: (typeof categories)[number]) {
   return category.groups.reduce((total, group) => total + group.items.length, 0)
 }
 
+function getResourceId(categoryTitle: string, groupTitle: string, resource: Resource) {
+  return `${slugify(categoryTitle)}-${slugify(groupTitle)}-${slugify(resource.name)}`
+}
+
 function IntroCopy() {
   return (
     <p>
@@ -93,17 +105,21 @@ function ResourceItem({
   resource,
   groupTitle,
   meta,
+  selected = false,
+  onToggleStack,
 }: {
   resource: Resource | Recommendation
   groupTitle: string
   meta?: string
+  selected?: boolean
+  onToggleStack?: () => void
 }) {
   return (
-    <li>
+    <li className={`${selected ? "selected" : ""}${onToggleStack ? " stackable" : ""}`}>
       <LinkPreview href={resource.url}>
-        <span className="resource-logo" aria-hidden="true">
+        <motion.span className="resource-logo" aria-hidden="true">
           <img src={getLogoUrl(resource.url)} alt="" loading="lazy" decoding="async" />
-        </span>
+        </motion.span>
         <span className="resource-copy">
           <span className="name">{resource.name}</span>
           <span className="description">{getDescription(resource, groupTitle)}</span>
@@ -111,6 +127,11 @@ function ResourceItem({
         <span className="domain">{meta ?? getDomain(resource.url)}</span>
         <span className="arrow" aria-hidden="true">↗</span>
       </LinkPreview>
+      {onToggleStack && (
+        <button type="button" className="stack-pick" onClick={onToggleStack} aria-pressed={selected}>
+          {selected ? "added" : "stack"}
+        </button>
+      )}
     </li>
   )
 }
@@ -123,6 +144,34 @@ export default function App() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
   const [recommendationMessage, setRecommendationMessage] = useState("")
+  const [selectedStack, setSelectedStack] = useState<string[]>([])
+  const [stackName, setStackName] = useState("")
+  const [stackHandle, setStackHandle] = useState("")
+
+  const flatResources = useMemo<StackResource[]>(
+    () =>
+      categories.flatMap((category) =>
+        category.groups.flatMap((group) =>
+          group.items.map((resource) => ({
+            ...resource,
+            id: getResourceId(category.title, group.title, resource),
+            groupTitle: group.title,
+            categoryTitle: category.title,
+          })),
+        ),
+      ),
+    [],
+  )
+
+  const selectedResources = selectedStack
+    .map((id) => flatResources.find((resource) => resource.id === id))
+    .filter((resource): resource is StackResource => Boolean(resource))
+
+  const toggleStackResource = (resourceId: string) => {
+    setSelectedStack((current) =>
+      current.includes(resourceId) ? current.filter((id) => id !== resourceId) : [...current, resourceId],
+    )
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -217,7 +266,7 @@ export default function App() {
             </a>
           </div>
 
-          <nav className="side-nav" aria-label="Categories">
+          <ArcListNav label="Categories">
             <span className="side-label">Navigation</span>
             {categories.map((category) => (
               <a
@@ -229,9 +278,9 @@ export default function App() {
                 <small>{getCategoryCount(category)}</small>
               </a>
             ))}
-          </nav>
+          </ArcListNav>
 
-          <nav className="side-nav granular-nav" aria-label="Resource sections">
+          <ArcListNav label="Resource sections">
             <span className="side-label">Sections</span>
             {categories.flatMap((category) =>
               category.groups.map((group) => (
@@ -245,7 +294,20 @@ export default function App() {
                 </a>
               )),
             )}
-          </nav>
+          </ArcListNav>
+
+          <div className="globe-dock">
+            <ExpandableView
+              preview={
+                <>
+                  <span>live users</span>
+                  <strong>{selectedStack.length || "geo"}</strong>
+                </>
+              }
+            >
+              <LiveUsersGlobe />
+            </ExpandableView>
+          </div>
         </aside>
 
         <main id="top">
@@ -255,24 +317,14 @@ export default function App() {
               <p className="headline-kicker">for your next project</p>
             </div>
 
-            <div className="view-toggle" aria-label="View mode">
-              <button
-                type="button"
-                className={viewMode === "list" ? "active" : ""}
-                onClick={() => setViewMode("list")}
-                aria-pressed={viewMode === "list"}
-              >
-                list
-              </button>
-              <button
-                type="button"
-                className={viewMode === "grid" ? "active" : ""}
-                onClick={() => setViewMode("grid")}
-                aria-pressed={viewMode === "grid"}
-              >
-                grid
-              </button>
-            </div>
+            <FanMenu
+              value={viewMode}
+              onChange={setViewMode}
+              items={[
+                { value: "list", label: "list" },
+                { value: "grid", label: "grid" },
+              ]}
+            />
           </header>
 
         <section className="recommender" aria-labelledby="recommender-title">
@@ -320,32 +372,104 @@ export default function App() {
           )}
         </section>
 
-        <div className="directory">
-          {categories.map((category) => (
-            <section className="category" id={slugify(category.title)} key={category.title}>
-              <div className="category-heading">
-                <div>
-                  <h2>{category.title}</h2>
-                  <p>{category.groups.map((group) => group.title).join(" · ")}</p>
-                </div>
-              </div>
+        <section className="split-builder" aria-label="Resources and stack builder">
+          <div className="split-pane split-pane-resources">
+            <div className="split-pane-heading">
+              <span>all resources</span>
+              <small>{resourceCount} tools</small>
+            </div>
+            <div className="directory">
+              {categories.map((category) => (
+                <section className="category" id={slugify(category.title)} key={category.title}>
+                  <div className="category-heading">
+                    <div>
+                      <h2>{category.title}</h2>
+                      <p>{category.groups.map((group) => group.title).join(" · ")}</p>
+                    </div>
+                  </div>
 
-              {category.groups.map((group) => (
-                <div className="resource-group" id={getGroupId(category.title, group.title)} key={group.title}>
-                  <ol className={`resource-list ${viewMode}`}>
-                    {group.items.map((resource) => (
-                      <ResourceItem
-                        key={`${group.title}-${resource.name}`}
-                        resource={resource}
-                        groupTitle={group.title}
-                      />
-                    ))}
-                  </ol>
-                </div>
+                  {category.groups.map((group) => (
+                    <div className="resource-group" id={getGroupId(category.title, group.title)} key={group.title}>
+                      <ol className={`resource-list ${viewMode}`}>
+                        {group.items.map((resource) => {
+                          const resourceId = getResourceId(category.title, group.title, resource)
+
+                          return (
+                            <ResourceItem
+                              key={`${group.title}-${resource.name}`}
+                              resource={resource}
+                              groupTitle={group.title}
+                              selected={selectedStack.includes(resourceId)}
+                              onToggleStack={() => toggleStackResource(resourceId)}
+                            />
+                          )
+                        })}
+                      </ol>
+                    </div>
+                  ))}
+                </section>
               ))}
-            </section>
-          ))}
-        </div>
+            </div>
+          </div>
+          <div className="split-handle" aria-hidden="true">
+            <span />
+          </div>
+          <div className="split-pane split-pane-stack">
+            <div className="split-pane-heading">
+              <span>people stacks</span>
+              <small>{selectedResources.length} selected</small>
+            </div>
+            <div className="stack-owner">
+              <input
+                value={stackName}
+                onChange={(event) => setStackName(event.target.value)}
+                placeholder="your name"
+                aria-label="Your name"
+              />
+              <input
+                value={stackHandle}
+                onChange={(event) => setStackHandle(event.target.value)}
+                placeholder="@twitter"
+                aria-label="Twitter handle"
+              />
+            </div>
+            <div className="stack-board">
+              {selectedResources.length === 0 ? (
+                <p>pick resources from the list and they will fly into your stack.</p>
+              ) : (
+                <motion.ol layout className="stack-list">
+                  <AnimatePresence initial={false}>
+                    {selectedResources.map((resource) => (
+                      <motion.li
+                        layout
+                        key={resource.id}
+                        initial={{ opacity: 0, y: 22, scale: 0.92, filter: "blur(8px)" }}
+                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, x: 28, scale: 0.96, filter: "blur(5px)" }}
+                        transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}
+                      >
+                        <motion.span className="stack-logo">
+                          <img src={getLogoUrl(resource.url)} alt="" />
+                        </motion.span>
+                        <span>
+                          <strong>{resource.name}</strong>
+                          <small>{resource.groupTitle}</small>
+                        </span>
+                        <button type="button" onClick={() => toggleStackResource(resource.id)}>
+                          remove
+                        </button>
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                </motion.ol>
+              )}
+            </div>
+            <div className="stack-signature">
+              <span>{stackName || "anonymous builder"}</span>
+              <small>{stackHandle || "@handle"}</small>
+            </div>
+          </div>
+        </section>
 
         <footer>
           <span>
