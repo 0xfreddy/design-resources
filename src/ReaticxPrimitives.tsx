@@ -175,6 +175,22 @@ const FanRoot = memo(function FanRoot({
     [isControlled, onOpenChange],
   )
 
+  const toggle = useCallback(() => setOpenState(!isOpen), [isOpen, setOpenState])
+  const close = useCallback(() => setOpenState(false), [setOpenState])
+  const pressItem = useCallback(
+    (itemValue?: string, callback?: (value?: string) => void) => {
+      callback?.(itemValue)
+      setOpenState(false)
+    },
+    [setOpenState],
+  )
+  const registerItem = useCallback((id: string) => {
+    setOrder((current) => (current.includes(id) ? current : [...current, id]))
+  }, [])
+  const unregisterItem = useCallback((id: string) => {
+    setOrder((current) => current.filter((item) => item !== id))
+  }, [])
+
   const value = useMemo<FanContextValue>(
     () => ({
       isOpen,
@@ -188,16 +204,28 @@ const FanRoot = memo(function FanRoot({
         tilt,
         stagger,
       },
-      toggle: () => setOpenState(!isOpen),
-      close: () => setOpenState(false),
-      pressItem: (itemValue, callback) => {
-        callback?.(itemValue)
-        setOpenState(false)
-      },
-      registerItem: (id) => setOrder((current) => (current.includes(id) ? current : [...current, id])),
-      unregisterItem: (id) => setOrder((current) => current.filter((item) => item !== id)),
+      toggle,
+      close,
+      pressItem,
+      registerItem,
+      unregisterItem,
     }),
-    [direction, isOpen, itemDirection, order, setOpenState, spacing, spread, stagger, tilt, buttonSize],
+    [
+      buttonSize,
+      close,
+      direction,
+      isOpen,
+      itemDirection,
+      order,
+      pressItem,
+      registerItem,
+      spacing,
+      spread,
+      stagger,
+      tilt,
+      toggle,
+      unregisterItem,
+    ],
   )
 
   return (
