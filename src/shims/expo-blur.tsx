@@ -5,14 +5,14 @@ export type BlurViewProps = ViewProps & {
   tint?: "light" | "dark" | "default" | "prominent" | "systemUltraThinMaterial" | string
 }
 
-export function BlurView({ intensity: _intensity, tint: _tint, style, ...props }: BlurViewProps) {
+export function BlurView({ intensity = 0, tint: _tint, style, ...props }: BlurViewProps) {
   return (
     <View
       {...props}
       style={[
         {
-          backgroundColor: "rgba(255,255,255,0.34)",
-          backdropFilter: "blur(18px)",
+          backgroundColor: "transparent",
+          backdropFilter: `blur(${Math.max(0, intensity) * 0.2}px)`,
         } as any,
         style,
       ]}

@@ -453,7 +453,7 @@ const ArcListIndicator: React.FC<IArcListIndicator> = ({
 
   const rFill = useAnimatedStyle<Pick<ViewStyle, "opacity">>(() => ({
     opacity: proximity.value,
-  }), [proximity]);
+  }));
 
   return (
     <Animated.View

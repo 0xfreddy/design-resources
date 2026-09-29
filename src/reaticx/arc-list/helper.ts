@@ -1,37 +1,56 @@
-export function offsetForIndex(index: number, itemHeight: number) {
-  "worklet"
-  return index * itemHeight
+import { HORIZON, MAX_SWEEP, MIN_RADIUS, MIN_SWEEP } from "./const";
+
+function itemOffset(
+  index: number,
+  itemHeight: number,
+  scrollY: number,
+): number {
+  "worklet";
+  return index * itemHeight - scrollY;
 }
 
-export function indexAt(scrollY: number, itemHeight: number, count: number) {
-  "worklet"
-  if (count <= 0) return -1
-  return Math.max(0, Math.min(count - 1, Math.round(scrollY / itemHeight)))
+function radiusForSweep(halfHeight: number, sweep: number): number {
+  "worklet";
+  const bounded = Math.min(Math.max(sweep, MIN_SWEEP), MAX_SWEEP);
+  const angle = (bounded * Math.PI) / 180;
+  return Math.max(halfHeight / Math.sin(angle), MIN_RADIUS);
 }
 
-export function itemOffset(index: number, itemHeight: number, scrollY: number) {
-  "worklet"
-  return index * itemHeight - scrollY
-}
-
-export function radiusForSweep(halfHeight: number, sweep: number) {
-  "worklet"
-  const radians = (Math.abs(sweep) * Math.PI) / 180
-  return halfHeight / Math.sin(Math.max(radians / 2, 0.1))
-}
-
-export function projectOnArc(offset: number, radius: number, direction: number) {
-  "worklet"
-  const angle = offset / radius
-  const translateX = direction * radius * (1 - Math.cos(angle))
-  const rotate = direction * angle * (180 / Math.PI)
-  const visible = Math.abs(angle) < Math.PI * 0.92
+function projectOnArc(
+  offset: number,
+  radius: number,
+  direction: number,
+): {
+  translateX: number;
+  translateY: number;
+  rotate: number;
+  y: number;
+  visible: boolean;
+} {
+  "worklet";
+  const r = Math.max(radius, MIN_RADIUS);
+  const angle = offset / r;
+  const turned = Math.max(-HORIZON, Math.min(HORIZON, angle));
+  const y = r * Math.sin(turned);
 
   return {
-    translateX,
-    translateY: 0,
-    rotate,
-    y: offset,
-    visible,
-  }
+    translateX: r * (1 - Math.cos(turned)) * direction,
+    translateY: y - offset,
+    rotate: (-turned * 180 * direction) / Math.PI,
+    y,
+    visible: Math.abs(angle) < HORIZON,
+  };
 }
+
+function indexAt(scrollY: number, itemHeight: number, count: number): number {
+  "worklet";
+  if (count <= 0) return 0;
+  return Math.max(0, Math.min(count - 1, Math.round(scrollY / itemHeight)));
+}
+
+function offsetForIndex(index: number, itemHeight: number): number {
+  "worklet";
+  return index * itemHeight;
+}
+
+export { indexAt, itemOffset, offsetForIndex, projectOnArc, radiusForSweep };

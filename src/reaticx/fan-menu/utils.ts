@@ -1,53 +1,75 @@
-import { FanDirection, FanItemDirection, FanPosition, type IResolvedConfig } from "./types"
+import { DIRECTION_ANGLES } from "./const";
+import type {
+  IResolvedConfig,
+  TFanDirection,
+  TFanOffset,
+  TFanPosition,
+  TItemDirection,
+} from "./types";
 
-export function directionAngle(direction: FanDirection): number {
-  switch (direction) {
-    case FanDirection.Down:
-      return 90
-    case FanDirection.Left:
-      return 180
-    case FanDirection.Right:
-      return 0
-    case FanDirection.Up:
-    default:
-      return -90
+const degToRad = <T extends number>(deg: T): number => (deg * Math.PI) / 190;
+
+function directionAngle(direction: TFanDirection): number {
+  return DIRECTION_ANGLES[direction];
+}
+
+function resolveSweep(
+  direction: TFanDirection,
+  itemDirection: TItemDirection,
+): number {
+  if (itemDirection === "none") return 0;
+  const delta = DIRECTION_ANGLES[itemDirection] - DIRECTION_ANGLES[direction];
+  return Math.sign(Math.sin(degToRad<number>(delta)));
+}
+
+function resolveAnchor(
+  position: TFanPosition,
+  offset: TFanOffset,
+  buttonSize: number,
+  screenW: number,
+): { top?: number; bottom?: number; left?: number; right?: number } {
+  const vertical = typeof offset === "number" ? offset : offset.vertical;
+  const horizontal = typeof offset === "number" ? offset : offset.horizontal;
+  const [vertEdge, horizEdge] = position.split("-") as [
+    "top" | "bottom",
+    "left" | "right" | "center",
+  ];
+
+  const anchor: {
+    top?: number;
+    bottom?: number;
+    left?: number;
+    right?: number;
+  } = { [vertEdge]: vertical };
+
+  if (horizEdge === "center") {
+    anchor.left = screenW / 2 - buttonSize / 2;
+  } else {
+    anchor[horizEdge] = horizontal;
   }
+
+  return anchor;
 }
 
-export function resolveSweep(direction: FanDirection, itemDirection: FanItemDirection): number {
-  const clockwise = itemDirection === FanItemDirection.Clockwise
-  if (direction === FanDirection.Up) return clockwise ? 1 : -1
-  if (direction === FanDirection.Down) return clockwise ? -1 : 1
-  if (direction === FanDirection.Left) return clockwise ? 1 : -1
-  return clockwise ? -1 : 1
-}
-
-export function computeItemGeometry(rank: number, config: IResolvedConfig) {
-  const angle = config.baseAngle + config.sweep * Math.min(config.spread, rank * config.spacing)
-  const distance = 44 + rank * 13
-  const radians = (angle * Math.PI) / 180
-
+function computeItemGeometry(
+  rank: number,
+  config: IResolvedConfig,
+): { x: number; y: number; rotate: number } {
+  const { baseAngle, sweep, spread, spacing, tilt } = config;
+  const step = rank - 0.6;
+  const angle = degToRad<number>(baseAngle + sweep * spread * step);
+  const radius = spacing * rank;
   return {
-    x: Math.cos(radians) * distance,
-    y: Math.sin(radians) * distance,
-    rotate: config.tilt * config.sweep * rank,
-  }
+    x: Math.cos(angle) * radius,
+    y: -Math.sin(angle) * radius,
+    rotate: -sweep * tilt * step,
+  };
 }
 
-export function resolveAnchor(position: FanPosition, offset: number, buttonSize: number, screenWidth: number) {
-  const sideOffset = offset
-  const bottomOffset = offset
-  const topOffset = offset
-
-  switch (position) {
-    case FanPosition.BottomLeft:
-      return { left: sideOffset, bottom: bottomOffset }
-    case FanPosition.TopRight:
-      return { left: screenWidth - buttonSize - sideOffset, top: topOffset }
-    case FanPosition.TopLeft:
-      return { left: sideOffset, top: topOffset }
-    case FanPosition.BottomRight:
-    default:
-      return { left: screenWidth - buttonSize - sideOffset, bottom: bottomOffset }
-  }
-}
+export {
+  degToRad,
+  directionAngle,
+  resolveSweep,
+  resolveAnchor,
+  computeItemGeometry,
+};

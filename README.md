@@ -15,6 +15,14 @@ npm run dev
 
 Create a production build with `npm run build`.
 
+## Interactive Components
+
+Navigation, view switching, split panes, the expandable globe, and the preview border use the complete Reaticx components. See [source provenance and browser compatibility changes](src/reaticx/README.md). Run `npm run check:components` to verify source hashes and `npm run test:e2e` with the local app on port 5174 to check interactions in Chrome.
+
+The plus/check control adds or removes resources from your stack. Your selection, name, and Twitter handle are saved as a local browser draft; Publish stack makes that stack visible to other visitors. Handles are self-reported, not verified identities. Shared stacks use `/api/stacks`; mount a Railway volume and set `STACKS_FILE=/data/stacks.json` for persistence across deployments (local default: `.data/stacks.json`). Hover previews expand into an accessible in-site dialog; the real Apple Intelligence shader loads on demand.
+
+The live visitor globe queries PostHog through `/api/live-users`. Set `POSTHOG_HOST`, `POSTHOG_PROJECT_ID`, and server-only `POSTHOG_PERSONAL_API_KEY` (query read access). It shows an unavailable state until configured; no sample visitors are presented as live traffic. The query currently reads events from the selected project, so use a project dedicated to this website.
+
 ## Resource Directory
 
 ### UI Component Libraries

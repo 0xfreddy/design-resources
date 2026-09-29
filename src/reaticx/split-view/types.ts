@@ -1,43 +1,57 @@
-import type { ReactNode } from "react"
-import type { StyleProp, TextStyle, ViewStyle } from "react-native"
-import type { GestureType } from "react-native-gesture-handler"
-import type { SharedValue, WithSpringConfig } from "react-native-reanimated"
+import type { ReactNode } from "react";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
+import type { Gesture } from "react-native-gesture-handler";
+import type { SharedValue, WithSpringConfig } from "react-native-reanimated";
 
-export type ISplitViewRoot = {
-  children: ReactNode
-  initialTopHeight?: number
-  minTopHeight?: number
-  minBottomHeight?: number
-  maxTopHeight?: number
-  gap?: number
-  snapPoints?: number[]
-  velocityThreshold?: number
-  springConfig?: WithSpringConfig
-  onHeightChange?: (height: number) => void
-  style?: StyleProp<ViewStyle>
+type TSplitViewComponents =
+  | "SplitView.Bottom"
+  | "SplitView.Handle"
+  | "SplitView.Top";
+
+interface ISplitViewRoot {
+  children: ReactNode;
+  readonly initialTopHeight?: number;
+  readonly minTopHeight?: number;
+  readonly minBottomHeight?: number;
+  readonly springConfig?: WithSpringConfig;
+  readonly maxTopHeight?: number;
+  readonly gap?: number;
+  readonly snapPoints?: readonly number[];
+  readonly velocityThreshold?: number;
+  readonly onHeightChange?: (height: number) => void;
+  readonly style?: StyleProp<ViewStyle>;
 }
 
-export type ISplitViewPane = {
-  children: ReactNode
-  style?: StyleProp<ViewStyle>
+interface ISplitViewPane {
+  children: ReactNode;
+  readonly style?: StyleProp<ViewStyle>;
 }
 
-export type ISplitViewHandle = {
-  color?: string
-  style?: StyleProp<ViewStyle>
-  barStyle?: StyleProp<ViewStyle>
+interface ISplitViewHandle {
+  readonly color?: string;
+  readonly style?: StyleProp<ViewStyle>;
+  readonly barStyle?: StyleProp<ViewStyle>;
 }
 
-export type ISplitViewTitle = {
-  children: ReactNode
-  style?: StyleProp<TextStyle>
+interface ISplitViewTitle {
+  children: ReactNode;
+  readonly style?: StyleProp<TextStyle>;
 }
 
-export type ISplitViewContext = {
-  topHeight: SharedValue<number>
-  handleScale: SharedValue<number>
-  gap: number
-  minTop: number
-  maxTop: number
-  gesture: GestureType
+interface ISplitViewContext {
+  topHeight: SharedValue<number>;
+  handleScale: SharedValue<number>;
+  gap: number;
+  minTop: number;
+  maxTop: number;
+  gesture: ReturnType<typeof Gesture.Pan>;
 }
+
+export type {
+  ISplitViewRoot,
+  ISplitViewPane,
+  ISplitViewHandle,
+  ISplitViewTitle,
+  ISplitViewContext,
+  TSplitViewComponents,
+};

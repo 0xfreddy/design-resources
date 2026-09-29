@@ -62,7 +62,7 @@ function readCategories() {
   throw new Error("Could not find exported categories in src/resources.ts")
 }
 
-function flattenResources() {
+export function flattenResources() {
   const categories = readCategories()
 
   return categories.flatMap((category) =>

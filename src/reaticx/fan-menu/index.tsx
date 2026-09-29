@@ -204,7 +204,6 @@ const FanRoot: React.FC<IFanMenu> & React.FunctionComponent<IFanMenu> =
             Extrapolation.CLAMP,
           ),
         }),
-        [progress],
       );
 
       const showDefaultTrigger = !hasChildType(children, FanTrigger);
@@ -267,13 +266,13 @@ const FanTrigger = memo<IFanTrigger>(
           ),
         },
       ],
-    }), [pressed]);
+    }));
 
     const iconStyle = useAnimatedStyle(() => ({
       transform: [
         { rotate: `${interpolate(progress.value, [0, 1], [0, 45])}deg` },
       ],
-    }), [progress]);
+    }));
 
     return (
       <Animated.View
@@ -369,7 +368,7 @@ const FanItem = memo<IFanItem>(
           { rotate: `${geo.rotate * p}deg` },
         ],
       };
-    }, [t, geo, size]);
+    });
 
     const pressableStyle = useAnimatedStyle(() => ({
       transform: [
@@ -382,7 +381,7 @@ const FanItem = memo<IFanItem>(
           ),
         },
       ],
-    }), [pressed]);
+    }));
 
     const blurProps = useAnimatedProps<Pick<BlurViewProps, "intensity">>(
       () => ({
@@ -395,7 +394,6 @@ const FanItem = memo<IFanItem>(
           ),
         ),
       }),
-      [t],
     );
 
     const handlePressIn = () => {

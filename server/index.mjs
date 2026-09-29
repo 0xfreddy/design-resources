@@ -3,11 +3,15 @@ import { createServer } from "node:http"
 import { extname, join, normalize, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { createRecommendHandler } from "./recommend.mjs"
+import { createLiveUsersHandler } from "./live-users.mjs"
+import { createStacksHandler } from "./stacks.mjs"
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const distDir = join(root, "dist")
 const port = Number(process.env.PORT ?? 4173)
 const recommendHandler = createRecommendHandler(process.env.TYPESAFE_API_KEY)
+const liveUsersHandler = createLiveUsersHandler()
+const stacksHandler = createStacksHandler()
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
@@ -20,6 +24,7 @@ const mimeTypes = {
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
+  ".wasm": "application/wasm",
 }
 
 function sendNotFound(res) {
@@ -47,6 +52,14 @@ function sendStatic(req, res) {
 }
 
 const server = createServer((req, res) => {
+  if (req.url?.split("?")[0] === "/api/stacks") {
+    void stacksHandler(req, res)
+    return
+  }
+  if (req.url?.split("?")[0] === "/api/live-users") {
+    void liveUsersHandler(req, res)
+    return
+  }
   if (req.url?.startsWith("/api/recommend")) {
     recommendHandler(req, res, () => {
       res.statusCode = 405

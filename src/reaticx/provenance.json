@@ -1,0 +1,155 @@
+{
+  "retrieved": "2026-09-29",
+  "files": [
+    {
+      "file": "arc-list/const.ts",
+      "source": "https://www.reacticx.com/components/arc-list",
+      "upstreamSha256": "2c98ea798090e831746fe9145391ae35f3adbc9eda9561a3d1956c81954dae8c",
+      "installedSha256": "2c98ea798090e831746fe9145391ae35f3adbc9eda9561a3d1956c81954dae8c"
+    },
+    {
+      "file": "arc-list/helper.ts",
+      "source": "https://www.reacticx.com/components/arc-list",
+      "upstreamSha256": "8c72a4a5f4a2584ef1809785241474ea17a455a2f61648854d49e08eb3957b67",
+      "installedSha256": "8c72a4a5f4a2584ef1809785241474ea17a455a2f61648854d49e08eb3957b67"
+    },
+    {
+      "file": "arc-list/index.tsx",
+      "source": "https://www.reacticx.com/components/arc-list",
+      "upstreamSha256": "c11d57ed093c5dbda6359bdcd16b8dcbf3c954f4a32493155dc5b448a3803f43",
+      "installedSha256": "c11d57ed093c5dbda6359bdcd16b8dcbf3c954f4a32493155dc5b448a3803f43"
+    },
+    {
+      "file": "arc-list/types.ts",
+      "source": "https://www.reacticx.com/components/arc-list",
+      "upstreamSha256": "9a58b945ba254c42a7cc71427367d72b087bcb7d51404d8728d707d31d627e1f",
+      "installedSha256": "9a58b945ba254c42a7cc71427367d72b087bcb7d51404d8728d707d31d627e1f"
+    },
+    {
+      "file": "fan-menu/const.ts",
+      "source": "https://www.reacticx.com/components/fan-menu",
+      "upstreamSha256": "e71a2d7d673c60886e21287c7ce5adf1fcc99e141ba313fb361f0452fa3d3f72",
+      "installedSha256": "e71a2d7d673c60886e21287c7ce5adf1fcc99e141ba313fb361f0452fa3d3f72"
+    },
+    {
+      "file": "fan-menu/context.tsx",
+      "source": "https://www.reacticx.com/components/fan-menu",
+      "upstreamSha256": "01b1cf4302b062432dcbd5bb6a7113a490c35c6ff84cc742cc949a78ffefa809",
+      "installedSha256": "01b1cf4302b062432dcbd5bb6a7113a490c35c6ff84cc742cc949a78ffefa809"
+    },
+    {
+      "file": "fan-menu/index.tsx",
+      "source": "https://www.reacticx.com/components/fan-menu",
+      "upstreamSha256": "aa1664a222c5bd6b1536901851581871fcf869581a8250ee2c2e0e7408684eaf",
+      "installedSha256": "aa1664a222c5bd6b1536901851581871fcf869581a8250ee2c2e0e7408684eaf"
+    },
+    {
+      "file": "fan-menu/types.ts",
+      "source": "https://www.reacticx.com/components/fan-menu",
+      "upstreamSha256": "8eea69d82d6db772e2a7ca1cc27a9b1b8d522c5fe1a6d2d67dd8502cf5156838",
+      "installedSha256": "8eea69d82d6db772e2a7ca1cc27a9b1b8d522c5fe1a6d2d67dd8502cf5156838"
+    },
+    {
+      "file": "fan-menu/utils.ts",
+      "source": "https://www.reacticx.com/components/fan-menu",
+      "upstreamSha256": "ad5af3417baa0c90ed00d1b4bde4f475eb25841e3b46d0020d2256881cdb37cd",
+      "installedSha256": "ad5af3417baa0c90ed00d1b4bde4f475eb25841e3b46d0020d2256881cdb37cd"
+    },
+    {
+      "file": "split-view/const.ts",
+      "source": "https://www.reacticx.com/components/split-view",
+      "upstreamSha256": "43593f9f951771d67875111f380125c20c24d0c34f08f625ca4f07b876fc5cc7",
+      "installedSha256": "43593f9f951771d67875111f380125c20c24d0c34f08f625ca4f07b876fc5cc7"
+    },
+    {
+      "file": "split-view/context.tsx",
+      "source": "https://www.reacticx.com/components/split-view",
+      "upstreamSha256": "30c2047a98abec1f60c6381c08ce8dfb08ce3c5428721b752026d63d070427b2",
+      "installedSha256": "30c2047a98abec1f60c6381c08ce8dfb08ce3c5428721b752026d63d070427b2"
+    },
+    {
+      "file": "split-view/helpers.ts",
+      "source": "https://www.reacticx.com/components/split-view",
+      "upstreamSha256": "665e1097c1195e7c20e6b110a38b75f1aec538876c9dcdacc216a5d9abecacb6",
+      "installedSha256": "665e1097c1195e7c20e6b110a38b75f1aec538876c9dcdacc216a5d9abecacb6"
+    },
+    {
+      "file": "split-view/index.tsx",
+      "source": "https://www.reacticx.com/components/split-view",
+      "upstreamSha256": "572728f24001e7f7780964e10ac027b99ae9c75141b443c014575444fc0dfde3",
+      "installedSha256": "572728f24001e7f7780964e10ac027b99ae9c75141b443c014575444fc0dfde3"
+    },
+    {
+      "file": "split-view/types.ts",
+      "source": "https://www.reacticx.com/components/split-view",
+      "upstreamSha256": "93c6fc8cd98793113c5b089465e3c88b7cd5cfe0d4866022bf6d2ab3a8649fa5",
+      "installedSha256": "2fc323dc7d0fee678c7845da5db27fde1b0365b5abe54b5e9c2bde9f83aecb04"
+    },
+    {
+      "file": "expandable-view/const.ts",
+      "source": "https://www.reacticx.com/components/expandable-view",
+      "upstreamSha256": "c01400b290f0ca1bc805e1b55cf2b5d79583529845bf621de1e630f23f51d254",
+      "installedSha256": "c01400b290f0ca1bc805e1b55cf2b5d79583529845bf621de1e630f23f51d254"
+    },
+    {
+      "file": "expandable-view/context.tsx",
+      "source": "https://www.reacticx.com/components/expandable-view",
+      "upstreamSha256": "4d47a0460d98b102be73bd9be00225d5b92ada8cf2ec411b15346f2f8667ab86",
+      "installedSha256": "4d47a0460d98b102be73bd9be00225d5b92ada8cf2ec411b15346f2f8667ab86"
+    },
+    {
+      "file": "expandable-view/index.tsx",
+      "source": "https://www.reacticx.com/components/expandable-view",
+      "upstreamSha256": "db5d6dee7e9aeb6923db02b1f1daf71b309343ce46eaef3ae99836a5f9feab31",
+      "installedSha256": "db5d6dee7e9aeb6923db02b1f1daf71b309343ce46eaef3ae99836a5f9feab31"
+    },
+    {
+      "file": "expandable-view/types.ts",
+      "source": "https://www.reacticx.com/components/expandable-view",
+      "upstreamSha256": "21feb7f589f209da21ae774b85d39497023169735a838f22c278fa1e832d8973",
+      "installedSha256": "21feb7f589f209da21ae774b85d39497023169735a838f22c278fa1e832d8973"
+    },
+    {
+      "file": "apple-intelligence/conf.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "79d052e3be841c670f55586bad8d1a2080d9de516285738793b190be481be97c",
+      "installedSha256": "79d052e3be841c670f55586bad8d1a2080d9de516285738793b190be481be97c"
+    },
+    {
+      "file": "apple-intelligence/const.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "c1eb31b5eb22611d69e868817e10856a5bd75ee02ff0c088c1cbca83aab0499a",
+      "installedSha256": "c1eb31b5eb22611d69e868817e10856a5bd75ee02ff0c088c1cbca83aab0499a"
+    },
+    {
+      "file": "apple-intelligence/context.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "b5be3c85a411de53cda9ef5f6eb8d534e7d1a4a9e816f7c2846bf1de19eefdc8",
+      "installedSha256": "b5be3c85a411de53cda9ef5f6eb8d534e7d1a4a9e816f7c2846bf1de19eefdc8"
+    },
+    {
+      "file": "apple-intelligence/helpers.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "5d5396371b09b8daf1183ea73d34b74fc782f0f09d5b55c4dbeacaddf6883715",
+      "installedSha256": "5d5396371b09b8daf1183ea73d34b74fc782f0f09d5b55c4dbeacaddf6883715"
+    },
+    {
+      "file": "apple-intelligence/index.tsx",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "19a8a76bc2f39949265c9112f05208f7fd8a9431d2b1d8238bdac977a9553df4",
+      "installedSha256": "7c61fff99d188ff0688ded0e4f971b54c2549f2b548d053a6842975bc8bab43e"
+    },
+    {
+      "file": "apple-intelligence/types.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "956a288834c24dd1d320ee69b6cd8984258dd375a92bd53897033704ed9fa6a0",
+      "installedSha256": "956a288834c24dd1d320ee69b6cd8984258dd375a92bd53897033704ed9fa6a0"
+    },
+    {
+      "file": "apple-intelligence/use-siri-uniforms.ts",
+      "source": "https://www.reacticx.com/components/apple-intelligence",
+      "upstreamSha256": "dc4a44f5152cde867106ddbdab726be61fcf16fd2fd032e499f0d361d2584d4f",
+      "installedSha256": "dc4a44f5152cde867106ddbdab726be61fcf16fd2fd032e499f0d361d2584d4f"
+    }
+  ]
+}

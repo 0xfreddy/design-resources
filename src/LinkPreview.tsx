@@ -1,173 +1,114 @@
-import { AnimatePresence, motion } from "framer-motion"
-import { useEffect, useState, type MouseEvent, type ReactNode } from "react"
-import { AppleIntelligenceFrame } from "./ReaticxPrimitives"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react"
+import { createPortal } from "react-dom"
+import { ArrowUpRight, Check, Expand, Plus, X } from "lucide-react"
+
+const IntelligenceFrame = lazy(async () => {
+  const { LoadSkiaWeb } = await import("@shopify/react-native-skia/lib/module/web/LoadSkiaWeb")
+  await LoadSkiaWeb({ locateFile: () => new URL("../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm", import.meta.url).href })
+  return import("./IntelligenceFrame")
+})
+
+class PreviewEffectBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
 
 type LinkPreviewProps = {
   href: string
+  name: string
+  description: string
+  category: string
   children: ReactNode
+  selected?: boolean
+  onToggleStack?: (element?: HTMLElement) => void
 }
 
 const loadedScreenshots = new Set<string>()
+const pendingScreenshots = new Set<string>()
+const getLogo = (url: string) => `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`
 
-function getDomain(href: string) {
-  return new URL(href).hostname.replace("www.", "")
-}
+export function LinkPreview({ href, name, description, category, children, selected, onToggleStack }: LinkPreviewProps) {
+  const [hovered, setHovered] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const anchor = useRef<HTMLAnchorElement>(null)
+  const dialog = useRef<HTMLDialogElement>(null)
+  const reduceMotion = useReducedMotion()
+  const domain = new URL(href).hostname.replace("www.", "")
+  const screenshot = `https://s.wordpress.com/mshots/v1/${encodeURIComponent(href)}?w=960`
 
-function getScreenshotUrl(href: string) {
-  return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(href)}?w=480`
-}
-
-function getLogoUrl(href: string) {
-  return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(href)}&sz=64`
-}
-
-function warmPreview(src: string) {
-  if (loadedScreenshots.has(src)) return
-  const image = new Image()
-  image.onload = () => loadedScreenshots.add(src)
-  image.src = src
-}
-
-export function LinkPreview({ href, children }: LinkPreviewProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isPreviewHovered, setIsPreviewHovered] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isTouch, setIsTouch] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
-  const previewUrl = getScreenshotUrl(href)
-  const domain = getDomain(href)
-
-  useEffect(() => {
-    setIsTouch(window.matchMedia("(hover: none)").matches)
-  }, [])
-
-  useEffect(() => {
-    setImageLoaded(loadedScreenshots.has(previewUrl))
-  }, [previewUrl])
-
-  const placePreview = (event: MouseEvent<HTMLAnchorElement>) => {
-    const gutter = 14
-    const shadow = 10
-    const width = Math.min(292, window.innerWidth - gutter * 2 - shadow)
-    const height = width * 0.625 + 30 + shadow
-    const rect = event.currentTarget.getBoundingClientRect()
-    const preferredX = rect.right + 14
-    const fallbackX = rect.left - width - 14
-    let x = preferredX + width + gutter <= window.innerWidth ? preferredX : fallbackX
-    let y = rect.top + rect.height / 2 - height / 2
-
-    x = Math.max(gutter, Math.min(x, window.innerWidth - width - shadow - gutter))
-    y = Math.max(gutter, Math.min(y, window.innerHeight - height - gutter))
-
-    setPreviewPosition({ x, y })
+  const warm = () => {
+    if (loadedScreenshots.has(screenshot) || pendingScreenshots.has(screenshot)) return
+    pendingScreenshots.add(screenshot)
+    const image = new Image()
+    image.onload = () => { loadedScreenshots.add(screenshot); pendingScreenshots.delete(screenshot) }
+    image.onerror = () => pendingScreenshots.delete(screenshot)
+    image.src = screenshot
   }
+  const keep = () => { clearTimeout(closeTimer.current); setHovered(true) }
+  const leave = () => { closeTimer.current = setTimeout(() => setHovered(false), 180) }
+  const open = () => { clearTimeout(closeTimer.current); setHovered(false); setExpanded(true); warm() }
 
-  return (
-    <>
-      <a
-        className="resource-link"
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        onMouseEnter={(event) => {
-          warmPreview(previewUrl)
-          setImageLoaded(loadedScreenshots.has(previewUrl))
-          placePreview(event)
-          if (!isTouch) setIsHovered(true)
-        }}
-        onMouseLeave={() => setIsHovered(false)}
-        onFocus={() => setIsHovered(false)}
-      >
-        {children}
-      </a>
+  useEffect(() => () => clearTimeout(closeTimer.current), [])
+  useEffect(() => {
+    if (!hovered) return
+    const close = () => setHovered(false)
+    window.addEventListener("scroll", close, true)
+    window.addEventListener("resize", close)
+    return () => { window.removeEventListener("scroll", close, true); window.removeEventListener("resize", close) }
+  }, [hovered])
+  useEffect(() => {
+    if (!expanded) return
+    dialog.current?.showModal()
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = overflow; anchor.current?.focus({ preventScroll: true }) }
+  }, [expanded])
 
-      <AnimatePresence>
-        {(isHovered || isPreviewHovered) && (
-          <motion.aside
-            className="site-preview"
-            style={{ x: previewPosition.x, y: previewPosition.y }}
-            onMouseEnter={() => setIsPreviewHovered(true)}
-            onMouseLeave={() => setIsPreviewHovered(false)}
-            initial={{ opacity: 0, scale: 0.985, filter: "blur(4px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, scale: 0.985, filter: "blur(3px)" }}
-            transition={{ type: "spring", bounce: 0, duration: 0.24 }}
-          >
-            <div className="preview-bar">
-              <img src={getLogoUrl(href)} alt="" />
-              <span>{domain}</span>
-            </div>
-            <div className="preview-frame">
-              {!imageLoaded && (
-                <div className="preview-fallback">
-                  <img src={getLogoUrl(href)} alt="" />
-                  <span>loading preview</span>
-                </div>
-              )}
-              <img
-                className={imageLoaded ? "loaded" : ""}
-                src={previewUrl}
-                alt=""
-                loading="eager"
-                decoding="async"
-                onLoad={() => {
-                  loadedScreenshots.add(previewUrl)
-                  setImageLoaded(true)
-                }}
-              />
-            </div>
-            <div className="preview-actions">
-              <span>
-                <img src={getLogoUrl(href)} alt="" />
-                {domain}
-              </span>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault()
-                  setIsExpanded(true)
-                  setIsHovered(false)
-                  setIsPreviewHovered(false)
-                }}
-              >
-                expand
-              </button>
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            className="preview-modal-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-          >
-            <AppleIntelligenceFrame className="preview-modal">
-              <button type="button" className="preview-modal-close" onClick={() => setIsExpanded(false)}>
-                close
-              </button>
-              <div className="preview-modal-frame">
-                <img src={previewUrl} alt="" />
-              </div>
-              <div className="preview-modal-footer">
-                <span>
-                  <img src={getLogoUrl(href)} alt="" />
-                  <strong>{domain}</strong>
-                  <small>preview opened inside vibecooder.dev</small>
-                </span>
-                <a href={href} target="_blank" rel="noreferrer">
-                  Visit site ↗
-                </a>
-              </div>
-            </AppleIntelligenceFrame>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+  const previewImage = (
+    <div className="preview-image-area">
+      {!loaded && <div className="preview-fallback"><img src={getLogo(href)} alt="" /><span>{failed ? "Screenshot unavailable" : name}</span></div>}
+      <img className={loaded ? "loaded" : ""} src={screenshot} alt={`${name} website preview`} decoding="async"
+        onLoad={() => { loadedScreenshots.add(screenshot); setLoaded(true) }} onError={() => setFailed(true)} />
+    </div>
   )
+  const content = (
+    <div className="preview-modal-content">
+      <button className="icon-button preview-modal-close" title="Close preview" aria-label="Close preview" onClick={() => setExpanded(false)}><X size={20} /></button>
+      <div className="preview-modal-frame">{previewImage}</div>
+      <div className="preview-modal-footer">
+        <img className="preview-resource-logo" src={getLogo(href)} alt="" />
+        <div className="preview-resource-copy"><strong>{name}</strong><p>{description}</p><small>{category} · {domain}</small></div>
+        {onToggleStack && <button className="icon-button" title={selected ? "Remove from stack" : "Add to stack"} aria-label={selected ? "Remove from stack" : "Add to stack"} aria-pressed={selected} onClick={() => onToggleStack()}>{selected ? <Check size={19} /> : <Plus size={19} />}</button>}
+        <a className="visit-site" href={href} target="_blank" rel="noreferrer">Visit site <ArrowUpRight size={16} /></a>
+      </div>
+    </div>
+  )
+  return <>
+    <a ref={anchor} className="resource-link" href={href} onClick={event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey) { event.preventDefault(); open() } }}
+      onFocus={warm} onMouseEnter={() => {
+        warm()
+        if (!window.matchMedia("(hover: hover)").matches || expanded) return
+        setLoaded(loadedScreenshots.has(screenshot))
+        const rect = anchor.current!.getBoundingClientRect()
+        const width = Math.min(292, window.innerWidth - 32)
+        setPosition({ x: Math.max(16, Math.min(rect.right + 12, window.innerWidth - width - 16)), y: Math.max(16, Math.min(rect.top - 50, window.innerHeight - 260)) })
+        keep()
+      }} onMouseLeave={leave}>{children}</a>
+    {createPortal(<AnimatePresence>{hovered && !expanded && <motion.aside className="site-preview" style={{ left: position.x, top: position.y }} onMouseEnter={keep} onMouseLeave={leave}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
+      <div className="preview-frame">{previewImage}</div>
+      <div className="preview-actions"><span>{name}</span><button title="Expand preview" aria-label={`Expand ${name} preview`} onClick={open}><Expand size={16} /></button></div>
+    </motion.aside>}</AnimatePresence>, document.body)}
+    {expanded && createPortal(<dialog ref={dialog} className="preview-dialog" aria-label={`${name} preview`} onCancel={event => { event.preventDefault(); setExpanded(false) }} onClick={event => { if (event.target === event.currentTarget) setExpanded(false) }}>
+      <div className="preview-modal">
+        {reduceMotion ? content : <PreviewEffectBoundary fallback={content}><Suspense fallback={content}><IntelligenceFrame>{content}</IntelligenceFrame></Suspense></PreviewEffectBoundary>}
+      </div>
+    </dialog>, document.body)}
+  </>
 }
