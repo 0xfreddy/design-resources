@@ -68,6 +68,10 @@ function getInitialTheme() {
   return "light"
 }
 
+function getCategoryCount(category: (typeof categories)[number]) {
+  return category.groups.reduce((total, group) => total + group.items.length, 0)
+}
+
 function ResourceItem({
   resource,
   groupTitle,
@@ -97,6 +101,7 @@ function ResourceItem({
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme)
   const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [activeCategory, setActiveCategory] = useState(slugify(categories[0].title))
   const [prompt, setPrompt] = useState("")
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
@@ -107,6 +112,29 @@ export default function App() {
     document.documentElement.style.colorScheme = theme
     localStorage.setItem("resource-index-theme", theme)
   }, [theme])
+
+  useEffect(() => {
+    const sections = categories
+      .map((category) => document.getElementById(slugify(category.title)))
+      .filter((section): section is HTMLElement => Boolean(section))
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+
+        if (visible?.target.id) setActiveCategory(visible.target.id)
+      },
+      {
+        rootMargin: "-22% 0px -64% 0px",
+        threshold: [0.08, 0.2, 0.4],
+      },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
 
   const requestRecommendations = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -166,8 +194,13 @@ export default function App() {
 
           <nav className="side-nav" aria-label="Categories">
             {categories.map((category) => (
-              <a key={category.title} href={`#${slugify(category.title)}`}>
-                {category.title}
+              <a
+                key={category.title}
+                href={`#${slugify(category.title)}`}
+                className={activeCategory === slugify(category.title) ? "active" : ""}
+              >
+                <span>{category.title}</span>
+                <small>{getCategoryCount(category)}</small>
               </a>
             ))}
           </nav>

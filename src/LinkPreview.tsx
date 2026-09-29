@@ -6,6 +6,8 @@ type LinkPreviewProps = {
   children: ReactNode
 }
 
+const loadedScreenshots = new Set<string>()
+
 function getDomain(href: string) {
   return new URL(href).hostname.replace("www.", "")
 }
@@ -16,6 +18,13 @@ function getScreenshotUrl(href: string) {
 
 function getLogoUrl(href: string) {
   return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(href)}&sz=64`
+}
+
+function warmPreview(src: string) {
+  if (loadedScreenshots.has(src)) return
+  const image = new Image()
+  image.onload = () => loadedScreenshots.add(src)
+  image.src = src
 }
 
 export function LinkPreview({ href, children }: LinkPreviewProps) {
@@ -31,17 +40,18 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
   }, [])
 
   useEffect(() => {
-    setImageLoaded(false)
-  }, [href])
+    setImageLoaded(loadedScreenshots.has(previewUrl))
+  }, [previewUrl])
 
   const placePreview = (event: MouseEvent<HTMLAnchorElement>) => {
-    const gutter = 18
-    const shadow = 8
-    const width = Math.min(320, window.innerWidth - gutter * 2 - shadow)
-    const height = width * 0.625 + 28 + shadow
+    const gutter = 14
+    const shadow = 10
+    const width = Math.min(292, window.innerWidth - gutter * 2 - shadow)
+    const height = width * 0.625 + 30 + shadow
     const rect = event.currentTarget.getBoundingClientRect()
-    const preferredX = rect.right + 16
-    let x = preferredX
+    const preferredX = rect.right + 14
+    const fallbackX = rect.left - width - 14
+    let x = preferredX + width + gutter <= window.innerWidth ? preferredX : fallbackX
     let y = rect.top + rect.height / 2 - height / 2
 
     x = Math.max(gutter, Math.min(x, window.innerWidth - width - shadow - gutter))
@@ -58,7 +68,8 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
         target="_blank"
         rel="noreferrer"
         onMouseEnter={(event) => {
-          setImageLoaded(false)
+          warmPreview(previewUrl)
+          setImageLoaded(loadedScreenshots.has(previewUrl))
           placePreview(event)
           if (!isTouch) setIsHovered(true)
         }}
@@ -73,10 +84,10 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
           <motion.aside
             className="site-preview"
             style={{ x: previewPosition.x, y: previewPosition.y }}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.985, filter: "blur(4px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.985, filter: "blur(3px)" }}
+            transition={{ type: "spring", bounce: 0, duration: 0.24 }}
             aria-hidden="true"
           >
             <div className="preview-bar">
@@ -96,7 +107,10 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
                 alt=""
                 loading="eager"
                 decoding="async"
-                onLoad={() => setImageLoaded(true)}
+                onLoad={() => {
+                  loadedScreenshots.add(previewUrl)
+                  setImageLoaded(true)
+                }}
               />
             </div>
           </motion.aside>
