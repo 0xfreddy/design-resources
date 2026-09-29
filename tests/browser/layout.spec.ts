@@ -153,14 +153,17 @@ test("right-side checkboxes stay inside compact resource rows and selected tabs 
 
 test("mobile search and RadiantButton stay in bounds in both themes", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.getByRole("textbox", { name: "what are you building?" }).fill("animated icons")
-  await expect(page.locator(".jev-pick-action canvas").first()).toBeVisible({ timeout: 20000 })
   for (const theme of ["dark", "light"]) {
     if (theme === "light") await page.getByRole("button", { name: "Toggle color theme", exact: true }).last().click()
+    await page.getByRole("button", { name: "Search resources", exact: true }).click()
+    await page.getByRole("textbox", { name: "what are you building?" }).fill("animated icons")
+    await expect(page.locator(".mobile-search-form canvas").first()).toBeVisible({ timeout: 20000 })
     await page.waitForTimeout(600)
     const button = (await page.getByRole("button", { name: "Pick resources" }).boundingBox())!
     expect(button.x + button.width).toBeLessThanOrEqual(390)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
     await page.screenshot({ path: `test-results/mobile-search-${theme}.png` })
+    await page.getByRole("button", { name: "Close search", exact: true }).click()
+    await expect(page.getByRole("dialog", { name: "Describe your next project" })).toHaveCount(0)
   }
 })

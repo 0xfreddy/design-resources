@@ -81,27 +81,36 @@ function GlobeContent({ dark, diameter, width, visitors }: { dark: boolean; diam
 export function GlobeDock({ dark }: { dark: boolean }) {
   const size = useViewport()
   const visitors = useVisitors()
-  const [anchor, setAnchor] = useState({ left: 22, width: 254 })
+  const mobile = size.width <= 720
+  const [anchor, setAnchor] = useState({ left: 22, width: 254, right: 16, bottom: 16 })
   useLayoutEffect(() => {
     const sidebar = document.querySelector<HTMLElement>(".side-panel")
     const sponsor = document.querySelector<HTMLElement>(".sponsor-card")
     if (!sidebar || !sponsor) return
+    const footerAnchor = document.querySelector<HTMLElement>(".mobile-visitor-anchor")
     const measure = () => {
+      if (mobile && footerAnchor) {
+        const slot = footerAnchor.getBoundingClientRect()
+        setAnchor({ left: slot.left, width: slot.width, right: size.width - slot.right, bottom: size.height - slot.bottom })
+        return
+      }
       const card = sponsor.getBoundingClientRect()
       const panel = sidebar.getBoundingClientRect()
-      setAnchor(card.width ? { left: card.left, width: card.width } : { left: panel.left + 20, width: panel.width - 40 })
+      setAnchor({ ...(card.width ? { left: card.left, width: card.width } : { left: panel.left + 20, width: panel.width - 40 }), right: 16, bottom: 16 })
     }
     const observer = new ResizeObserver(measure)
     observer.observe(sidebar)
     observer.observe(sponsor)
+    if (footerAnchor) observer.observe(footerAnchor)
+    if (footerAnchor?.parentElement) observer.observe(footerAnchor.parentElement)
     measure()
     return () => observer.disconnect()
-  }, [size.width])
-  const width = anchor.width
+  }, [size.width, size.height, mobile])
+  const width = mobile ? Math.min(320, size.width - 32) : anchor.width
   const diameter = Math.max(80, Math.min(width - 40, size.height - 136))
   return createPortal(
-    <div className="globe-dock" style={{ left: anchor.left }}>
-      <ExpandableView collapsedWidth={width} expandedWidth={width} collapsedHeight={44}
+    <div className="globe-dock" style={mobile ? { left: "auto", right: anchor.right, bottom: anchor.bottom } : { left: anchor.left }}>
+      <ExpandableView collapsedWidth={anchor.width} expandedWidth={width} collapsedHeight={mobile ? 36 : 44}
         expandedHeight={diameter + 104} collapsedRadius={8} expandedRadius={8}
         style={{ maxWidth: size.width - 32, maxHeight: size.height - 32, backgroundColor: "var(--paper)", borderWidth: 1, borderColor: "var(--line)", boxShadow: "0 12px 48px rgba(0,0,0,0.16)" }}>
         <ExpandableView.Collapsed><span className="expandable-trigger-copy"><span>{visitors.configured ? `${visitors.total} online now` : "Live visitors"}</span></span></ExpandableView.Collapsed>

@@ -1,14 +1,14 @@
-import { motion, useReducedMotion } from "framer-motion"
+import { useReducedMotion } from "framer-motion"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { X, Menu } from "lucide-react"
+import { X, Menu, Search } from "lucide-react"
 import { PullCord } from "pullcord"
-import { LinkPreview } from "./LinkPreview"
-import { GlobeDock } from "./ResourceControls"
-import { ResourceCheckbox } from "./ResourceCheckbox"
+import { ResourceItem } from "./ResourceItem"
+import { GlobeDock, useViewport } from "./ResourceControls"
 import { ResourceNavigation } from "./ResourceNavigation"
 import { StackBrowser } from "./StackBrowser"
 import { StackPaneSizing } from "./StackPaneSizing"
 import { JevSearch } from "./JevSearch"
+import { MobileSearch } from "./MobileSearch"
 import { ShareStackDialog } from "./ShareStackDialog"
 import { RadiantAction } from "./RadiantAction"
 import { StackFlight, type StackFlightData } from "./StackFlight"
@@ -121,41 +121,14 @@ function IntroCopy() {
   )
 }
 
-function ResourceItem({
-  resource,
-  groupTitle,
-  meta,
-  selected = false,
-  onToggleStack,
-}: {
-  resource: Resource | Recommendation
-  groupTitle: string
-  meta?: string
-  selected?: boolean
-  onToggleStack?: (element?: HTMLElement) => void
-}) {
-  return (
-    <li className={`${selected ? "selected" : ""}${onToggleStack ? " stackable" : ""}`}>
-      <LinkPreview href={resource.url} name={resource.name} description={getDescription(resource, groupTitle)} category={groupTitle} selected={selected} onToggleStack={onToggleStack}>
-        <motion.span className="resource-logo" aria-hidden="true">
-          <img src={getLogoUrl(resource.url)} alt="" loading="lazy" decoding="async" />
-        </motion.span>
-        <span className="resource-copy">
-          <span className="name">{resource.name}</span>
-          {resource.note && <span className="description">{resource.note}</span>}
-        </span>
-        <span className="domain">{meta ?? getDomain(resource.url)}</span>
-        <span className="arrow" aria-hidden="true">↗</span>
-      </LinkPreview>
-      {onToggleStack && <ResourceCheckbox name={resource.name} checked={selected} onChange={onToggleStack} />}
-    </li>
-  )
-}
-
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme)
   const [activeSection, setActiveSection] = useState(slugify(categories[0].title))
   const [navigationOpen, setNavigationOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const { width: viewportWidth } = useViewport()
+  const mobile = viewportWidth <= 720
+  useEffect(() => { if (!mobile) { setSearchOpen(false); setNavigationOpen(false) } }, [mobile])
   const [prompt, setPrompt] = useState("")
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
@@ -325,7 +298,10 @@ export default function App() {
             <span className="brand-mark">vr</span>
             <span>vibecooder.dev</span>
           </a>
-          <button className="icon-button mobile-navigation-toggle" aria-label="Browse categories" title="Browse categories" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}>{navigationOpen ? <X size={18} /> : <Menu size={18} />}</button>
+          <div className="mobile-header-actions">
+            <button className="icon-button mobile-search-toggle" aria-label="Search resources" title="Search resources" aria-haspopup="dialog" onClick={() => { setNavigationOpen(false); setSearchOpen(true) }}><Search size={20} /></button>
+            <button className="icon-button mobile-navigation-toggle" aria-label="Browse categories" title="Browse categories" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}>{navigationOpen ? <X size={20} /> : <Menu size={20} />}</button>
+          </div>
 
           <header className="page-heading">
             <div className="page-heading-copy">
@@ -335,7 +311,7 @@ export default function App() {
           </header>
           </div>
 
-          <ResourceNavigation dark={theme === "dark"} activeId={activeSection} navigate={id => { scrollToSection(id); setNavigationOpen(false) }} />
+          <ResourceNavigation dark={theme === "dark"} mobile={mobile} activeId={activeSection} navigate={id => { scrollToSection(id); setNavigationOpen(false) }} />
 
           <div className="side-about">
           <div className="side-intro">
@@ -360,14 +336,14 @@ export default function App() {
         </aside>
 
         <main id="top">
-        <section className="recommender" aria-labelledby="recommender-title">
+        {!mobile && <section className="recommender" aria-labelledby="recommender-title">
           <JevSearch query={prompt} onChange={setPrompt} onPick={() => void requestRecommendations()} loading={recommendationStatus === "loading"} dark={theme === "dark"} />
-        </section>
+        </section>}
 
         <div className="split-builder" ref={splitContainer}>
         <SplitView initialTopHeight={splitHeight - 22 - (selectedResources.length ? 244 : 94)} minTopHeight={Math.min(180, Math.max(60, splitHeight - 267))} minBottomHeight={selectedResources.length ? Math.min(244, splitHeight - 83) : 94} gap={22} style={{ flex: 0, height: splitHeight, backgroundColor: "var(--paper)" }}>
           <StackPaneSizing selected={selectedResources.length > 0} height={splitHeight} />
-          <SplitView.Top style={{ overflow: "scroll", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)", overscrollBehavior: "contain" } as any}>
+          <SplitView.Top style={{ overflowY: "auto", overflowX: "hidden", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)", overscrollBehavior: "contain" } as any}>
             <div className="directory">
 
           {(recommendations.length > 0 || recommendationMessage) && (
@@ -384,6 +360,7 @@ export default function App() {
                       key={resource.id}
                       resource={resource}
                       groupTitle={resource.group}
+                      description={getDescription(resource, resource.group)}
                       selected={selectedResources.some(item => item.url === resource.url)}
                       onToggleStack={(element) => {
                         const match = flatResources.find(item => item.url === resource.url)
@@ -417,6 +394,7 @@ export default function App() {
                               key={`${group.title}-${resource.name}`}
                               resource={resource}
                               groupTitle={group.title}
+                              description={getDescription(resource, group.title)}
                               selected={selectedStack.includes(resourceId)}
                               onToggleStack={(element) => toggleStackResource(resourceId, element)}
                             />
@@ -430,14 +408,14 @@ export default function App() {
             </div>
           </SplitView.Top>
           <SplitView.Handle color="var(--split-handle)" style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: "var(--line)", cursor: "row-resize" } as any} />
-          <SplitView.Bottom style={{ overflow: "scroll", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)" }}>
+          <SplitView.Bottom style={{ overflowY: "auto", overflowX: "hidden", opacity: 1, borderRadius: 0, backgroundColor: "var(--paper)" } as any}>
             <div className="split-pane-heading" ref={stackTarget}>
               <span>people stacks</span>
               <small aria-live="polite">{selectedResources.length} selected</small>
             </div>
             <StackBrowser resources={selectedResources} remove={toggleStackResource} flyingIds={flights.map(flight => flight.id)} />
-            {selectedResources.length > 0 && <div className="stack-share-action"><RadiantAction label="Share the stack" onPress={() => { setStackMessage(""); setShareOpen(true) }} /></div>}
-            {shareLoadError && <p role="alert">{shareLoadError}</p>}
+            {selectedResources.length > 0 && <div className="stack-share-action"><RadiantAction label="Share the stack" borderless onPress={() => { setStackMessage(""); setShareOpen(true) }} /></div>}
+            {shareLoadError ? <p role="alert">{shareLoadError}</p> : null}
             {peopleStacks.length > 0 && <div className="people-stacks">
               {peopleStacks.map(stack => <article key={stack.id} className="published-stack">
                 <div className="published-owner"><strong>{stack.name}</strong>{stack.handle && <a href={`https://x.com/${encodeURIComponent(stack.handle)}`} target="_blank" rel="noreferrer">@{stack.handle}</a>}</div>
@@ -449,15 +427,19 @@ export default function App() {
         </div>
 
         <footer>
+          <div className="footer-credits">
           <span>
             built by <a href="https://x.com/freddy_0x" target="_blank" rel="noreferrer">0xfreddy</a> and{" "}
             <a href="https://x.com/YieldMaxing" target="_blank" rel="noreferrer">Max</a>
           </span>
           <span>·</span>
           <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">tested in prod</a>
+          </div>
+          <span className="mobile-visitor-anchor" aria-hidden="true" />
         </footer>
       </main>
       </div>
+      {mobile && searchOpen && <MobileSearch query={prompt} onChange={setPrompt} onPick={() => void requestRecommendations()} loading={recommendationStatus === "loading"} close={() => setSearchOpen(false)} />}
       {shareOpen && <ShareStackDialog resources={selectedResources} handle={stackHandle} setHandle={setStackHandle} close={() => setShareOpen(false)} publish={publishStack} publishing={publishing} error={stackMessage} />}
       {publicStack && <ShareStackDialog resources={publicStack.ids.map(id => flatResources.find(resource => resource.id === id)).filter((resource): resource is StackResource => Boolean(resource))} handle={publicStack.handle} sharedId={publicStack.id} close={() => { setPublicStack(null); const url = new URL(location.href); url.searchParams.delete("stack"); history.replaceState(null, "", url) }} />}
       <GlobeDock dark={theme === "dark"} />

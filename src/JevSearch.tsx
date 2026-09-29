@@ -20,7 +20,7 @@ export function JevSearch({ query, onChange, onPick, loading, dark }: { query: s
     <label htmlFor="resource-prompt" id="recommender-title">what are you building?</label>
     <div className="jev-search" ref={host}>
       {width > 0 && <SearchBar containerWidth={width} focusedWidth={Math.max(100, width - actionWidth)} cancelButtonWidth={actionWidth}
-        centerWhenUnfocused={false} nativeID="resource-prompt" accessibilityLabel="what are you building?"
+        centerWhenUnfocused={false} value={query} nativeID="resource-prompt" accessibilityLabel="what are you building?"
         inputStyle={{ color: dark ? "#e4e0d5" : "#181713", fontSize: 12, minHeight: 32, outlineWidth: 0 } as any}
         placeholder="Describe your next project..." tint={dark ? "#e4e0d5" : "#181713"}
         autoComplete="off" importantForAutofill="no" textContentType="none" spellCheck={false}

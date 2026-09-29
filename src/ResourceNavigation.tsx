@@ -36,7 +36,7 @@ function FollowDirectory({ index }: { index: number }) {
   return null
 }
 
-export function ResourceNavigation({ dark, activeId, navigate }: { dark: boolean; activeId: string; navigate: (id: string, close?: boolean) => void }) {
+export function ResourceNavigation({ dark, mobile = false, activeId, navigate }: { dark: boolean; mobile?: boolean; activeId: string; navigate: (id: string, close?: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState(320)
   useLayoutEffect(() => {
@@ -47,12 +47,12 @@ export function ResourceNavigation({ dark, activeId, navigate }: { dark: boolean
   const colors = dark ? { normal: "#aaa9a4", active: "#c99c74" } : { normal: "#767671", active: "#9c663c" }
   return <nav className="side-nav-shell unified-navigation" aria-label="Categories" data-active-id={activeId}>
     <div className="side-nav arc-list-nav" ref={host}>
-      <ArcList.Root height={height} itemHeight={46} radius={680} side="left" snap={false} haptics minOpacity={0.55} minScale={0.94} style={{ flex: 0 }}>
+      <ArcList.Root height={height} itemHeight={mobile ? 54 : 46} radius={mobile ? 720 : 580} side="left" snap={false} haptics minOpacity={mobile ? 0.7 : 0.55} minScale={0.94} style={{ flex: 0 }}>
         <FollowDirectory index={Math.max(0, items.findIndex(item => item.id === activeId))} />
         <ArcList.Viewport contentContainerStyle={{ paddingTop: 0, paddingBottom: 0 }} style={{ flex: 1 }}>
           {items.map(item => <ArcList.Item key={item.id} style={{ width: "100%", paddingLeft: item.child ? 18 : 2, paddingRight: 4 }} onPress={() => navigate(item.id, true)}>
             {!item.child && <ArcList.Indicator size={7} color={item.id === activeId ? colors.active : colors.normal} activeColor={item.id === activeId ? colors.active : colors.normal} />}
-            <ArcList.Label numberOfLines={2} color={item.id === activeId ? colors.active : colors.normal} activeColor={item.id === activeId ? colors.active : colors.normal} style={{ flex: 1, minWidth: 0, fontFamily: "Inter, system-ui, sans-serif", fontSize: item.child ? 11 : 12, fontWeight: item.id === activeId ? "600" : item.child ? "400" : "500", lineHeight: 16 }}><span data-nav-section={item.id} aria-current={item.id === activeId ? "location" : undefined}>{item.label}</span></ArcList.Label>
+            <ArcList.Label numberOfLines={2} color={item.id === activeId ? colors.active : colors.normal} activeColor={item.id === activeId ? colors.active : colors.normal} style={{ flex: 1, minWidth: 0, fontFamily: "Inter, system-ui, sans-serif", fontSize: mobile ? (item.child ? 14 : 16) : (item.child ? 11 : 12), fontWeight: item.id === activeId ? "600" : item.child ? "400" : "500", lineHeight: mobile ? 20 : 16 }}><span data-nav-section={item.id} aria-current={item.id === activeId ? "location" : undefined}>{item.label}</span></ArcList.Label>
           </ArcList.Item>)}
         </ArcList.Viewport>
       </ArcList.Root>

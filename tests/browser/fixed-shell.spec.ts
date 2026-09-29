@@ -12,7 +12,8 @@ for (const viewport of [{ width: 1591, height: 994 }, { width: 927, height: 994 
     await expect(nav.getByText("Product Analytics & Feedback", { exact: true })).toHaveCount(1)
     if (viewport.width < 720) await page.getByRole("button", { name: "Browse categories" }).click()
     await expect(page.locator("h1")).toBeInViewport()
-    const input = (await page.locator(".recommender").boundingBox())!
+    const searchControl = viewport.width <= 720 ? page.getByRole("button", { name: "Search resources", exact: true }) : page.locator(".recommender")
+    const input = (await searchControl.boundingBox())!
     const title = (await page.locator(".page-heading").boundingBox())!
     const pane = page.locator(".directory").locator("..")
     await pane.hover()
@@ -36,7 +37,7 @@ for (const viewport of [{ width: 1591, height: 994 }, { width: 927, height: 994 
     await page.mouse.wheel(0, 3000)
     expect(await page.evaluate(() => window.scrollY)).toBe(0)
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(viewport.height)
-    expect((await page.locator(".recommender").boundingBox())!.y).toBe(input.y)
+    expect((await searchControl.boundingBox())!.y).toBe(input.y)
     expect((await page.locator(".page-heading").boundingBox())!.y).toBe(title.y)
     await page.waitForTimeout(700)
     await page.screenshot({ path: `test-results/fixed-shell-${viewport.width}.png` })
