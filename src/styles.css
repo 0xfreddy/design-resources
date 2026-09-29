@@ -1577,3 +1577,23 @@ footer a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+.globe-country-labels {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px 8px;
+  pointer-events: none;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.globe-country-labels span {
+  background: var(--paper);
+  border-radius: 4px;
+  padding: 2px 5px;
+}

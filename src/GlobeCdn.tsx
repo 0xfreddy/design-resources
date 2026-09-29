@@ -5,6 +5,7 @@ interface CdnMarker {
   id: string
   location: [number, number]
   region: string
+  visits?: number
 }
 
 interface CdnArc {
@@ -45,6 +46,12 @@ const defaultArcs: CdnArc[] = [
 
 export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, className = "", speed = 0.003, dark = false }: GlobeCdnProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const globeRef = useRef<ReturnType<typeof createGlobe> | null>(null)
+  const markersRef = useRef(markers)
+  markersRef.current = markers
+  useEffect(() => {
+    globeRef.current?.update({ markers: markers.map(marker => ({ location: marker.location, size: Math.min(0.07, 0.012 + Math.sqrt(marker.visits || 1) * 0.004), id: marker.id })) })
+  }, [markers])
   const pointerInteracting = useRef<{ x: number; y: number } | null>(null)
   const dragOffset = useRef({ phi: 0, theta: 0 })
   const phiOffsetRef = useRef(0)
@@ -91,6 +98,7 @@ export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, classNa
     let globe: ReturnType<typeof createGlobe> | null = null
     let animationId = 0
     let phi = 0
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
 
     function init() {
       const width = canvas.offsetWidth
@@ -110,7 +118,7 @@ export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, classNa
         markerColor: dark ? [0.3, 0.7, 1] : [0.1, 0.35, 0.8],
         glowColor: dark ? [0.12, 0.12, 0.13] : [0.94, 0.94, 0.95],
         markerElevation: 0.02,
-        markers: markers.map((marker) => ({ location: marker.location, size: 0.012, id: marker.id })),
+        markers: markersRef.current.map((marker) => ({ location: marker.location, size: Math.min(0.07, 0.012 + Math.sqrt(marker.visits || 1) * 0.004), id: marker.id })),
         arcs: arcs.map((arc) => ({ from: arc.from, to: arc.to, id: arc.id })),
         arcColor: [0, 0, 0],
         arcWidth: 0.5,
@@ -118,8 +126,10 @@ export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, classNa
         opacity: 0.7,
       })
 
+      globeRef.current = globe
+
       function animate() {
-        if (!isPausedRef.current) phi += speed
+        if (!isPausedRef.current && !reducedMotion.matches && !document.hidden) phi += speed
         globe?.update({
           phi: phi + phiOffsetRef.current + dragOffset.current.phi,
           theta: 0.2 + thetaOffsetRef.current + dragOffset.current.theta,
@@ -143,13 +153,17 @@ export function GlobeCdn({ markers = defaultMarkers, arcs = defaultArcs, classNa
       if (animationId) cancelAnimationFrame(animationId)
       observer.disconnect()
       globe?.destroy()
+      globeRef.current = null
     }
-  }, [markers, arcs, speed, dark])
+  }, [arcs, speed, dark])
 
 
   return (
     <div className={`globe-cdn ${className}`}>
-      <canvas ref={canvasRef} onPointerDown={handlePointerDown} />
+      <canvas ref={canvasRef} onPointerDown={handlePointerDown} onPointerCancel={handlePointerUp} />
+      {markers.some(marker => marker.visits) && <div className="globe-country-labels" aria-label="Most visited countries">
+        {markers.slice(0, 3).map(marker => <span key={marker.id}>{marker.region} · {marker.visits}</span>)}
+      </div>}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { FanDirection, FanItemDirection, FanMenu } from "./reaticx/fan-menu"
 import { ExpandableView } from "./reaticx/expandable-view"
 import { useExpandable } from "./reaticx/expandable-view/context"
 import { GlobeCdn } from "./GlobeCdn"
+import { useVisitors, type VisitorData } from "./useVisitors"
 
 export function useViewport() {
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
@@ -43,13 +44,11 @@ export function ViewMenu({ value, onChange }: { value: "list" | "grid"; onChange
   )
 }
 
-type Location = { id: string; location: [number, number]; region: string }
 const noArcs: [] = []
 
-function GlobeContent({ dark, diameter, width }: { dark: boolean; diameter: number; width: number }) {
+function GlobeContent({ dark, diameter, width, visitors }: { dark: boolean; diameter: number; width: number; visitors: VisitorData }) {
   const { expanded, collapse } = useExpandable("GlobeContent")
-  const [locations, setLocations] = useState<Location[]>([])
-  const [status, setStatus] = useState("Visitor locations unavailable")
+  const status = visitors.configured ? `${visitors.total} online now · Countries shown by total visits` : "Visitors unavailable"
   const closeRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!expanded) return
@@ -60,24 +59,7 @@ function GlobeContent({ dark, diameter, width }: { dark: boolean; diameter: numb
     }
     document.addEventListener("keydown", key)
     document.addEventListener("pointerdown", outside)
-    let disposed = false
-    const controller = new AbortController()
-    const refresh = async () => {
-      try {
-        const response = await fetch("/api/live-users", { signal: controller.signal })
-        if (!response.ok) throw new Error("Unavailable")
-        const data = await response.json()
-        if (disposed) return
-        setLocations(data.locations ?? [])
-        setStatus(data.configured ? `${data.total ?? 0} visitors in the last 5 minutes` : "Visitor locations unavailable")
-      } catch { if (!disposed) setStatus("Visitor locations unavailable") }
-    }
-    void refresh()
-    const interval = window.setInterval(refresh, 60000)
     return () => {
-      disposed = true
-      controller.abort()
-      clearInterval(interval)
       document.removeEventListener("keydown", key)
       document.removeEventListener("pointerdown", outside)
     }
@@ -90,7 +72,7 @@ function GlobeContent({ dark, diameter, width }: { dark: boolean; diameter: numb
         </ExpandableView.Close>
       </div>
       <h2>Live visitors</h2>
-      {expanded && <div className="globe-square" style={{ width: diameter, height: diameter }}><GlobeCdn className="live-globe" markers={locations} arcs={noArcs} dark={dark} /></div>}
+      {expanded && <div className="globe-square" style={{ width: diameter, height: diameter }}><GlobeCdn className="live-globe" markers={visitors.locations} arcs={noArcs} dark={dark} /></div>}
       <p className="globe-note" role="status">{status}</p>
     </div>
   )
@@ -98,6 +80,7 @@ function GlobeContent({ dark, diameter, width }: { dark: boolean; diameter: numb
 
 export function GlobeDock({ dark }: { dark: boolean }) {
   const size = useViewport()
+  const visitors = useVisitors()
   const [anchor, setAnchor] = useState({ left: 22, width: 254 })
   useLayoutEffect(() => {
     const sidebar = document.querySelector<HTMLElement>(".side-panel")
@@ -121,8 +104,8 @@ export function GlobeDock({ dark }: { dark: boolean }) {
       <ExpandableView collapsedWidth={width} expandedWidth={width} collapsedHeight={44}
         expandedHeight={diameter + 104} collapsedRadius={8} expandedRadius={8}
         style={{ maxWidth: size.width - 32, maxHeight: size.height - 32, backgroundColor: "var(--paper)", borderWidth: 1, borderColor: "var(--line)", boxShadow: "0 12px 48px rgba(0,0,0,0.16)" }}>
-        <ExpandableView.Collapsed><span className="expandable-trigger-copy"><span>Live visitors</span></span></ExpandableView.Collapsed>
-        <ExpandableView.Expanded><GlobeContent dark={dark} diameter={diameter} width={width} /></ExpandableView.Expanded>
+        <ExpandableView.Collapsed><span className="expandable-trigger-copy"><span>{visitors.configured ? `${visitors.total} online now` : "Live visitors"}</span></span></ExpandableView.Collapsed>
+        <ExpandableView.Expanded><GlobeContent dark={dark} diameter={diameter} width={width} visitors={visitors} /></ExpandableView.Expanded>
       </ExpandableView>
     </div>, document.body,
   )
