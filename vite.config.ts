@@ -14,6 +14,10 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
 
   return {
+    define: {
+      __DEV__: mode !== "production",
+      global: "globalThis",
+    },
     resolve: {
       alias: {
         "react-native": "react-native-web",

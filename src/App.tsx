@@ -448,7 +448,9 @@ export default function App() {
               >
                 <FanMenu.Label style={viewMode === "grid" ? { color: "#fff" } : undefined}>grid</FanMenu.Label>
               </FanMenu.Item>
-              <FanMenu.Trigger>{viewMode}</FanMenu.Trigger>
+              <FanMenu.Trigger>
+                <Text>{viewMode}</Text>
+              </FanMenu.Trigger>
             </FanMenu>
           </header>
 

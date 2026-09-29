@@ -106,18 +106,18 @@ const ExpandableRoot: React.FC<IExpandableRoot> = ({
       [collapsedRadius, expandedRadius],
     ),
     transform: [{ scale: scale.value }],
-  }));
+  }), [progress, scale, collapsedWidth, expandedWidth, collapsedHeight, expandedHeight, collapsedRadius, expandedRadius]);
 
   const collapsedStyle = useAnimatedStyle<
     Pick<ViewStyle, "opacity" | "transform">
   >(() => ({
     opacity: interpolate(progress.value, [0, 0.5], [1, 0]),
     transform: [{ translateY: interpolate(progress.value, [0, 1], [0, 60]) }],
-  }));
+  }), [progress]);
 
   const expandedStyle = useAnimatedStyle<Pick<ViewStyle, "opacity">>(() => ({
     opacity: interpolate(progress.value, [0.15, 1], [0, 1]),
-  }));
+  }), [progress]);
 
   return (
     <ExpandableContext.Provider value={ctx}>
@@ -162,7 +162,7 @@ const ExpandableClose: React.FC<IExpandableClose> = ({
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.6, 1], [0, 1]),
-  }));
+  }), [progress]);
 
   return (
     <Animated.View style={[styles.closeWrap, animatedStyle]}>

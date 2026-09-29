@@ -165,6 +165,7 @@ const SplitViewTop: React.FC<ISplitViewPane> = ({
         Extrapolation.CLAMP,
       ),
     }),
+    [topHeight, minTop],
   );
 
   return (
@@ -188,6 +189,7 @@ const SplitViewHandle: React.FC<ISplitViewHandle> &
     () => ({
       transform: [{ scale: handleScale.value }],
     }),
+    [handleScale],
   );
 
   return (
@@ -221,7 +223,7 @@ const SplitViewBottom: React.FC<ISplitViewPane> = ({
       [1, 0.2],
       Extrapolation.CLAMP,
     ),
-  }));
+  }), [topHeight, maxTop]);
 
   return (
     <Animated.View
