@@ -1,8 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { Text } from "react-native"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
-import { ArcList, ExpandableView, FanMenu, GlobeCdn, SplitView } from "./ReaticxPrimitives"
+import { GlobeCdn } from "./ReaticxPrimitives"
+import { ArcList } from "./reaticx/arc-list"
+import { ExpandableView } from "./reaticx/expandable-view"
+import { FanDirection, FanItemDirection, FanMenu } from "./reaticx/fan-menu"
+import { SplitView } from "./reaticx/split-view"
 import { categories, type Resource } from "./resources"
 
 type Recommendation = {
@@ -92,6 +97,33 @@ function scrollToSection(sectionId: string) {
   history.replaceState(null, "", `#${sectionId}`)
 }
 
+const navItemStyle = {
+  width: "100%",
+  minWidth: 220,
+  paddingHorizontal: 9,
+  borderRadius: 6,
+} as const
+
+const activeNavItemStyle = {
+  backgroundColor: "rgba(24, 23, 19, 0.06)",
+} as const
+
+const navLabelStyle = {
+  flex: 1,
+  minWidth: 0,
+  fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+  fontSize: 12,
+  fontWeight: "500",
+  lineHeight: 18,
+} as const
+
+const navCountStyle = {
+  color: "rgba(113, 109, 101, 0.72)",
+  fontFamily: "SFMono-Regular, SF Mono, monospace",
+  fontSize: 10,
+  lineHeight: 18,
+} as const
+
 function IntroCopy() {
   return (
     <p>
@@ -152,6 +184,28 @@ export default function App() {
   const [selectedStack, setSelectedStack] = useState<string[]>([])
   const [stackName, setStackName] = useState("")
   const [stackHandle, setStackHandle] = useState("")
+
+  const granularGroups = useMemo(
+    () =>
+      categories.flatMap((category) =>
+        category.groups.map((group) => ({
+          category,
+          group,
+          sectionId: getGroupId(category.title, group.title),
+        })),
+      ),
+    [],
+  )
+
+  const activeCategoryIndex = Math.max(
+    0,
+    categories.findIndex((category) => activeSection.startsWith(slugify(category.title))),
+  )
+
+  const activeGroupIndex = Math.max(
+    0,
+    granularGroups.findIndex(({ sectionId }) => activeSection === sectionId),
+  )
 
   const flatResources = useMemo<StackResource[]>(
     () =>
@@ -273,48 +327,69 @@ export default function App() {
 
           <div className="side-nav-shell" aria-label="Categories">
             <span className="side-label">Navigation</span>
-            <ArcList.Root className="side-nav arc-list-nav" height={176} itemHeight={34} side="left" sweep={26} minOpacity={0.68} minScale={0.96}>
-              <ArcList.Viewport>
+            <div className="side-nav arc-list-nav">
+              <ArcList.Root
+                height={176}
+                itemHeight={34}
+                side="left"
+                sweep={26}
+                minOpacity={0.68}
+                minScale={0.96}
+                index={activeCategoryIndex}
+                style={{ height: 176 }}
+              >
+                <ArcList.Viewport>
                 {categories.map((category) => {
                   const sectionId = slugify(category.title)
+                  const isActive = activeSection.startsWith(sectionId)
 
                   return (
                     <ArcList.Item
                       key={category.title}
-                      className={activeSection.startsWith(sectionId) ? "active" : ""}
                       onPress={() => scrollToSection(sectionId)}
+                      style={[navItemStyle, isActive ? activeNavItemStyle : null]}
                     >
-                      <ArcList.Label>{category.title}</ArcList.Label>
-                      <small>{getCategoryCount(category)}</small>
+                      <ArcList.Label style={navLabelStyle}>{category.title}</ArcList.Label>
+                      <Text style={navCountStyle}>{getCategoryCount(category)}</Text>
                     </ArcList.Item>
                   )
                 })}
-              </ArcList.Viewport>
-            </ArcList.Root>
+                </ArcList.Viewport>
+              </ArcList.Root>
+            </div>
           </div>
 
           <div className="side-nav-shell granular-nav" aria-label="Resource sections">
             <span className="side-label">Sections</span>
-            <ArcList.Root className="side-nav arc-list-nav" height={300} itemHeight={31} side="left" sweep={22} minOpacity={0.58} minScale={0.94}>
-              <ArcList.Viewport>
-                {categories.flatMap((category) =>
-                  category.groups.map((group) => {
-                    const sectionId = getGroupId(category.title, group.title)
+            <div className="side-nav arc-list-nav">
+              <ArcList.Root
+                height={300}
+                itemHeight={31}
+                side="left"
+                sweep={22}
+                minOpacity={0.58}
+                minScale={0.94}
+                index={activeGroupIndex}
+                style={{ height: 300 }}
+              >
+                <ArcList.Viewport>
+                  {granularGroups.map(({ category, group, sectionId }) => {
+                    const isActive = activeSection === sectionId
 
                     return (
                       <ArcList.Item
                         key={`${category.title}-${group.title}`}
-                        className={activeSection === sectionId ? "active" : ""}
                         onPress={() => scrollToSection(sectionId)}
+                        style={[navItemStyle, isActive ? activeNavItemStyle : null]}
                       >
-                        <ArcList.Label>{group.title}</ArcList.Label>
-                        <small>{group.items.length}</small>
+                        <ArcList.Label style={[navLabelStyle, { fontSize: 11.5 }]}>{group.title}</ArcList.Label>
+                        <Text style={navCountStyle}>{group.items.length}</Text>
                       </ArcList.Item>
                     )
-                  }),
-                )}
-              </ArcList.Viewport>
-            </ArcList.Root>
+                  })}
+                </ArcList.Viewport>
+              </ArcList.Root>
+            </div>
           </div>
 
           <div className="globe-dock">
@@ -323,6 +398,12 @@ export default function App() {
               expandedWidth={380}
               collapsedHeight={42}
               expandedHeight={430}
+              style={{
+                backgroundColor: "rgba(255,255,255,0.96)",
+                borderWidth: 1,
+                borderColor: "rgba(20,20,17,0.12)",
+                boxShadow: "0 14px 48px rgba(20,20,17,0.08)",
+              } as any}
             >
               <ExpandableView.Collapsed>
                 <span className="expandable-trigger-copy">
@@ -346,20 +427,26 @@ export default function App() {
               <p className="headline-kicker">for your next project</p>
             </div>
 
-            <FanMenu direction="up" itemDirection="clockwise" buttonSize={42}>
+            <FanMenu
+              direction={FanDirection.Up}
+              itemDirection={FanItemDirection.Clockwise}
+              buttonSize={42}
+              offset={0}
+              style={{ position: "relative", left: 0, bottom: 0 }}
+            >
               <FanMenu.Item
                 value="list"
                 onPress={(value) => setViewMode((value ?? "list") as ViewMode)}
-                className={viewMode === "list" ? "active" : ""}
+                style={viewMode === "list" ? { backgroundColor: "#111" } : undefined}
               >
-                <FanMenu.Label>list</FanMenu.Label>
+                <FanMenu.Label style={viewMode === "list" ? { color: "#fff" } : undefined}>list</FanMenu.Label>
               </FanMenu.Item>
               <FanMenu.Item
                 value="grid"
                 onPress={(value) => setViewMode((value ?? "grid") as ViewMode)}
-                className={viewMode === "grid" ? "active" : ""}
+                style={viewMode === "grid" ? { backgroundColor: "#111" } : undefined}
               >
-                <FanMenu.Label>grid</FanMenu.Label>
+                <FanMenu.Label style={viewMode === "grid" ? { color: "#fff" } : undefined}>grid</FanMenu.Label>
               </FanMenu.Item>
               <FanMenu.Trigger>{viewMode}</FanMenu.Trigger>
             </FanMenu>
@@ -410,12 +497,9 @@ export default function App() {
           )}
         </section>
 
-        <SplitView className="split-builder" initialTopHeight={560} minTopHeight={360} minBottomHeight={250} gap={18}>
-          <SplitView.Top className="split-pane-resources">
-            <div className="split-pane-heading">
-              <span>all resources</span>
-              <small>{resourceCount} tools</small>
-            </div>
+        <div className="split-builder">
+        <SplitView initialTopHeight={560} minTopHeight={360} minBottomHeight={250} gap={18} style={{ minHeight: 820, height: 820 }}>
+          <SplitView.Top style={{ overflow: "scroll", paddingRight: 8 }}>
             <div className="directory">
               {categories.map((category) => (
                 <section className="category" id={slugify(category.title)} key={category.title}>
@@ -450,7 +534,7 @@ export default function App() {
             </div>
           </SplitView.Top>
           <SplitView.Handle />
-          <SplitView.Bottom className="split-pane-stack">
+          <SplitView.Bottom style={{ overflow: "scroll", paddingRight: 8 }}>
             <div className="split-pane-heading">
               <span>people stacks</span>
               <small>{selectedResources.length} selected</small>
@@ -506,6 +590,7 @@ export default function App() {
             </div>
           </SplitView.Bottom>
         </SplitView>
+        </div>
 
         <footer>
           <span>

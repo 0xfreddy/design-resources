@@ -1,0 +1,17 @@
+export const CENTRE_Z = 100
+export const Z_BAND_LIMIT = 8
+export const DEFAULT_ACTIVE_INDICATOR_COLOR = "#141411"
+export const DEFAULT_ACTIVE_LABEL_COLOR = "#141411"
+export const DEFAULT_FONT_SIZE = 12
+export const DEFAULT_INDICATOR_BORDER = 1
+export const DEFAULT_INDICATOR_COLOR = "rgba(20,20,17,0.22)"
+export const DEFAULT_INDICATOR_SIZE = 10
+export const DEFAULT_ITEM_HEIGHT = 34
+export const DEFAULT_LABEL_COLOR = "#6f6e68"
+export const DEFAULT_MIN_OPACITY = 0.6
+export const DEFAULT_MIN_SCALE = 0.94
+export const DEFAULT_SWEEP = 26
+export const FALLOFF_PLATEAU = 0.36
+export const PLATEAU_SCALE = 0.98
+export const PROXIMITY_SPAN = 2.4
+export const UNKNOWN_INDEX = -1
