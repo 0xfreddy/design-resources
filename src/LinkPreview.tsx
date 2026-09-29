@@ -11,18 +11,28 @@ function getDomain(href: string) {
 }
 
 function getScreenshotUrl(href: string) {
-  return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(href)}?w=720`
+  return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(href)}?w=480`
+}
+
+function getLogoUrl(href: string) {
+  return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(href)}&sz=64`
 }
 
 export function LinkPreview({ href, children }: LinkPreviewProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isTouch, setIsTouch] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
   const previewUrl = getScreenshotUrl(href)
+  const domain = getDomain(href)
 
   useEffect(() => {
     setIsTouch(window.matchMedia("(hover: none)").matches)
   }, [])
+
+  useEffect(() => {
+    setImageLoaded(false)
+  }, [href])
 
   const placePreview = (event: MouseEvent<HTMLAnchorElement>) => {
     const gutter = 18
@@ -48,6 +58,7 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
         target="_blank"
         rel="noreferrer"
         onMouseEnter={(event) => {
+          setImageLoaded(false)
           placePreview(event)
           if (!isTouch) setIsHovered(true)
         }}
@@ -69,9 +80,25 @@ export function LinkPreview({ href, children }: LinkPreviewProps) {
             aria-hidden="true"
           >
             <div className="preview-bar">
-              <span>{getDomain(href)}</span>
+              <img src={getLogoUrl(href)} alt="" />
+              <span>{domain}</span>
             </div>
-            <img src={previewUrl} alt="" loading="eager" decoding="async" />
+            <div className="preview-frame">
+              {!imageLoaded && (
+                <div className="preview-fallback">
+                  <img src={getLogoUrl(href)} alt="" />
+                  <span>loading preview</span>
+                </div>
+              )}
+              <img
+                className={imageLoaded ? "loaded" : ""}
+                src={previewUrl}
+                alt=""
+                loading="eager"
+                decoding="async"
+                onLoad={() => setImageLoaded(true)}
+              />
+            </div>
           </motion.aside>
         )}
       </AnimatePresence>
