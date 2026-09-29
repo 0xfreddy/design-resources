@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { PullCord } from "pullcord"
 import { LinkPreview } from "./LinkPreview"
-import MediaBetweenText from "./MediaBetweenText"
 import { categories, type Resource } from "./resources"
 
 type Recommendation = {
@@ -50,6 +49,10 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
 }
 
+function getGroupId(categoryTitle: string, groupTitle: string) {
+  return `${slugify(categoryTitle)}-${slugify(groupTitle)}`
+}
+
 function getDomain(url: string) {
   return new URL(url).hostname.replace("www.", "")
 }
@@ -70,6 +73,20 @@ function getInitialTheme() {
 
 function getCategoryCount(category: (typeof categories)[number]) {
   return category.groups.reduce((total, group) => total + group.items.length, 0)
+}
+
+function IntroCopy() {
+  return (
+    <p>
+      all the best libraries/tools i've found on x, reddit and dms
+      <span>
+        for daily feed:{" "}
+        <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">
+          tested
+        </a>
+      </span>
+    </p>
+  )
 }
 
 function ResourceItem({
@@ -101,7 +118,7 @@ function ResourceItem({
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme)
   const [viewMode, setViewMode] = useState<ViewMode>("list")
-  const [activeCategory, setActiveCategory] = useState(slugify(categories[0].title))
+  const [activeSection, setActiveSection] = useState(slugify(categories[0].title))
   const [prompt, setPrompt] = useState("")
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [recommendationStatus, setRecommendationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
@@ -114,8 +131,12 @@ export default function App() {
   }, [theme])
 
   useEffect(() => {
-    const sections = categories
-      .map((category) => document.getElementById(slugify(category.title)))
+    const sectionIds = categories.flatMap((category) => [
+      slugify(category.title),
+      ...category.groups.map((group) => getGroupId(category.title, group.title)),
+    ])
+    const sections = sectionIds
+      .map((sectionId) => document.getElementById(sectionId))
       .filter((section): section is HTMLElement => Boolean(section))
 
     const observer = new IntersectionObserver(
@@ -124,7 +145,7 @@ export default function App() {
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
 
-        if (visible?.target.id) setActiveCategory(visible.target.id)
+        if (visible?.target.id) setActiveSection(visible.target.id)
       },
       {
         rootMargin: "-22% 0px -64% 0px",
@@ -175,8 +196,12 @@ export default function App() {
         <aside className="side-panel" aria-label="Resource navigation">
           <a className="brand" href="#top" aria-label="Back to top">
             <span className="brand-mark">vr</span>
-            <span>vibe resources</span>
+            <span>vibecooder.dev</span>
           </a>
+
+          <div className="side-intro">
+            <IntroCopy />
+          </div>
 
           <div className="side-section">
             <span className="side-label">Sponsors</span>
@@ -193,50 +218,41 @@ export default function App() {
           </div>
 
           <nav className="side-nav" aria-label="Categories">
+            <span className="side-label">Navigation</span>
             {categories.map((category) => (
               <a
                 key={category.title}
                 href={`#${slugify(category.title)}`}
-                className={activeCategory === slugify(category.title) ? "active" : ""}
+                className={activeSection.startsWith(slugify(category.title)) ? "active" : ""}
               >
                 <span>{category.title}</span>
                 <small>{getCategoryCount(category)}</small>
               </a>
             ))}
           </nav>
+
+          <nav className="side-nav granular-nav" aria-label="Resource sections">
+            <span className="side-label">Sections</span>
+            {categories.flatMap((category) =>
+              category.groups.map((group) => (
+                <a
+                  key={`${category.title}-${group.title}`}
+                  href={`#${getGroupId(category.title, group.title)}`}
+                  className={activeSection === getGroupId(category.title, group.title) ? "active" : ""}
+                >
+                  <span>{group.title}</span>
+                  <small>{group.items.length}</small>
+                </a>
+              )),
+            )}
+          </nav>
         </aside>
 
         <main id="top">
           <header className="page-heading">
             <div className="page-heading-copy">
-              <h1><span>{resourceCount}</span> vibe resources for your next project</h1>
-              <div className="subtitle">
-                <p>all the best libraries/tools i've found on x, reddit and dms</p>
-                <div className="daily-feed-line">
-                  <span>for daily feed:</span>
-                  <a href="https://t.me/+MeWicfEktdNmODZk" target="_blank" rel="noreferrer">
-                    <MediaBetweenText
-                      firstText="tested"
-                      secondText="in prod"
-                      mediaUrl="/tested-in-prod.jpeg"
-                      mediaType="image"
-                      triggerType="hover"
-                      as="span"
-                      alt="Banana character sitting on a folding chair"
-                      className="media-between-text"
-                      mediaContainerClassName="daily-feed-media"
-                      animationVariants={{
-                        initial: { width: 0, opacity: 1 },
-                        animate: {
-                          width: 28,
-                          opacity: 1,
-                          transition: { duration: 0.4, type: "spring", bounce: 0 },
-                        },
-                      }}
-                    />
-                  </a>
-                </div>
-              </div>
+              <h1><span>{resourceCount}</span> vibe resources</h1>
+              <p className="headline-kicker">for your next project</p>
             </div>
 
             <div className="view-toggle" aria-label="View mode">
@@ -271,9 +287,11 @@ export default function App() {
                 onChange={(event) => setPrompt(event.target.value)}
                 placeholder="glassy saas landing page, animated icons, mobile onboarding..."
               />
-              <button type="submit" disabled={recommendationStatus === "loading" || !prompt.trim()}>
-                {recommendationStatus === "loading" ? "…" : "pick"}
-              </button>
+              {prompt.trim() && (
+                <button type="submit" disabled={recommendationStatus === "loading"}>
+                  {recommendationStatus === "loading" ? "…" : "pick resources"}
+                </button>
+              )}
             </div>
           </form>
 
@@ -313,11 +331,7 @@ export default function App() {
               </div>
 
               {category.groups.map((group) => (
-                <div className="resource-group" key={group.title}>
-                  <div className="group-heading">
-                    <h3>{group.title}</h3>
-                    <p>{groupDescriptions[group.title] ?? "Useful tools and references for this part of the build."}</p>
-                  </div>
+                <div className="resource-group" id={getGroupId(category.title, group.title)} key={group.title}>
                   <ol className={`resource-list ${viewMode}`}>
                     {group.items.map((resource) => (
                       <ResourceItem
