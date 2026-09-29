@@ -20,6 +20,7 @@
     "expo-haptics": "^57.0.3",
     "expo-symbols": "^57.0.3",
     "framer-motion": "^12.23.12",
+    "geoip-country": "^5.0.202609260156",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.48.0",
     "pullcord": "^0.1.0",

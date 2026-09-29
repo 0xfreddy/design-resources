@@ -77,3 +77,19 @@ test("visitor tracking fails honestly and rejects cross-site heartbeats", async 
   })
   assert.equal((await call(noGeo, "POST", undefined, { "x-vercel-ip-country": "GB" })).data.total, 1)
 })
+
+test("Railway country lookup uses only its trusted client IP and never sends it to Redis", async () => {
+  const { visitorCountry } = await import("../server/visitor-country.mjs")
+  const env = { ...visitorEnv, VISITORS_COUNTRY_HEADER: "", RAILWAY_ENVIRONMENT_ID: "production" }
+  assert.equal(visitorCountry({ "x-real-ip": "8.8.8.8", "x-vercel-ip-country": "GB" }, env), "US")
+  assert.equal(visitorCountry({ "x-real-ip": "8.8.8.8" }, {}), "")
+  for (const ip of ["127.0.0.1", "10.0.0.1", "invalid", "8.8.8.8, 1.1.1.1"]) {
+    assert.equal(visitorCountry({ "x-real-ip": ip }, env), "")
+  }
+  const handler = createLiveUsersHandler(env, async (_url, options) => {
+    assert.equal(JSON.parse(options.body)[8], "US")
+    assert.ok(!options.body.includes("8.8.8.8"))
+    return { ok: true, json: async () => ({ result: [1, ["US", "1"]] }) }
+  })
+  assert.equal((await call(handler, "POST", undefined, { "x-real-ip": "8.8.8.8" })).data.locations[0].id, "US")
+})

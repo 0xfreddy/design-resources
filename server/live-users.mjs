@@ -1,5 +1,6 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto"
 import { countries } from "./countries.mjs"
+import { visitorCountry } from "./visitor-country.mjs"
 
 // Atomic across instances. Only aggregate countries and expiring anonymous IDs.
 export const visitorScript = `
@@ -48,9 +49,7 @@ export function createLiveUsersHandler(env = process.env, request = fetch) {
           freshCookie = `${cookieName}=${value}.${sign(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400${secure ? "; Secure" : ""}`
         }
       }
-      // Opt into a header only when the deployment's trusted proxy overwrites it.
-      const header = env.VISITORS_COUNTRY_HEADER?.toLowerCase() || (env.VERCEL ? "x-vercel-ip-country" : "")
-      const code = header ? String(req.headers[header] || "").toUpperCase() : ""
+      const code = req.method === "POST" ? visitorCountry(req.headers, env) : ""
       const response = await request(env.UPSTASH_REDIS_REST_URL, {
         method: "POST",
         headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}`, "Content-Type": "application/json" },
