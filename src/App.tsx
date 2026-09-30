@@ -85,8 +85,10 @@ function getDescription(resource: Pick<Resource, "note" | "url">, groupTitle: st
 }
 
 function getInitialTheme() {
-  const saved = localStorage.getItem("resource-index-theme")
-  if (saved === "dark" || saved === "light") return saved
+  try {
+    const saved = localStorage.getItem("resource-index-theme")
+    if (saved === "dark" || saved === "light") return saved
+  } catch { /* Dark mode remains the default when storage is unavailable. */ }
   return "dark"
 }
 
@@ -294,10 +296,6 @@ export default function App() {
       <div className="app-shell">
         <aside className="side-panel" aria-label="Resource navigation" data-mobile-open={navigationOpen}>
           <div className="side-heading">
-          <a className="brand" href="#top" aria-label="Back to top" onClick={event => { event.preventDefault(); document.querySelector(".directory")?.parentElement?.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" }) }}>
-            <span className="brand-mark">vr</span>
-            <span>vibecooder.dev</span>
-          </a>
           <div className="mobile-header-actions">
             <button className="icon-button mobile-search-toggle" aria-label="Search resources" title="Search resources" aria-haspopup="dialog" onClick={() => { setNavigationOpen(false); setSearchOpen(true) }}><Search size={20} /></button>
             <button className="icon-button mobile-navigation-toggle" aria-label="Browse categories" title="Browse categories" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}>{navigationOpen ? <X size={20} /> : <Menu size={20} />}</button>
