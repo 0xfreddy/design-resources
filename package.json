@@ -23,6 +23,7 @@
     "geoip-country": "^5.0.202609260156",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.48.0",
+    "posthog-js": "^1.435.3",
     "pullcord": "^0.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
