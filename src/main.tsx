@@ -10,6 +10,14 @@ if (posthogProjectToken) {
   posthog.init(posthogProjectToken, {
     api_host: import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com",
     defaults: "2026-05-30",
+    autocapture: true,
+    capture_pageview: "history_change",
+    capture_pageleave: true,
+    capture_exceptions: {
+      capture_unhandled_errors: true,
+      capture_unhandled_rejections: true,
+      capture_console_errors: false,
+    },
   })
 }
 
