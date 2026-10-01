@@ -38,6 +38,7 @@ export const categories: Category[] = [
           r("Inspora", "https://www.inspora.design"),
           r("Beautiful UI", "https://www.beautifului.dev"),
           r("Beui", "https://beui.dev"),
+          r("Bencho", "https://bencho.dev/", "Interactive UI blocks to explore, customize, and reuse"),
           r("Beutiful UI", "https://www.beautifului.dev"),
           r("Beautiful", "https://www.beautifului.dev"),
           r("FeralUI", "https://feralui.dev"),

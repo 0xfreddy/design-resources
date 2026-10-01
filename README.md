@@ -1,6 +1,6 @@
 # Design Resources
 
-A compact, categorized index of 101 design resources across 5 categories and 21 groups.
+A compact, categorized index of 102 design resources across 5 categories and 21 groups.
 
 This repo contains a Vite website and a GitHub-friendly resource directory. Both are powered by the catalog in [`src/resources.ts`](src/resources.ts), so the site and README stay organized around the same source of truth.
 
@@ -52,6 +52,7 @@ The visitor dock sends a heartbeat to `/api/live-users` every 30 seconds, even w
 | <a href="https://www.inspora.design"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.inspora.design?w=620" alt="Inspora website preview" width="260"></a> | **[Inspora](https://www.inspora.design)**<br><sub>inspora.design</sub> |
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beautiful UI website preview" width="260"></a> | **[Beautiful UI](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://beui.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fbeui.dev?w=620" alt="Beui website preview" width="260"></a> | **[Beui](https://beui.dev)**<br><sub>beui.dev</sub> |
+| <a href="https://bencho.dev/"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fbencho.dev%2F?w=620" alt="Bencho website preview" width="260"></a> | **[Bencho](https://bencho.dev/)**<br><sub>bencho.dev</sub><br><sub>Interactive UI blocks to explore, customize, and reuse</sub> |
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beutiful UI website preview" width="260"></a> | **[Beutiful UI](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://www.beautifului.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.beautifului.dev?w=620" alt="Beautiful website preview" width="260"></a> | **[Beautiful](https://www.beautifului.dev)**<br><sub>beautifului.dev</sub> |
 | <a href="https://feralui.dev"><img src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fferalui.dev?w=620" alt="FeralUI website preview" width="260"></a> | **[FeralUI](https://feralui.dev)**<br><sub>feralui.dev</sub> |
