@@ -89,50 +89,27 @@ test("globe fits, follows theme, renders pixels and closes repeatedly", async ({
   await expect(page.getByRole("dialog", { name: "Live visitors" })).toHaveCount(0)
 })
 
-test("expanded preview uses the animated original shader and can be reopened", async ({ page }) => {
+test("preview opens without a glow or expand button and can be reopened", async ({ page }) => {
   const errors: string[] = []
   page.on("pageerror", error => errors.push(String(error)))
   await page.locator(".resource-link").first().hover()
-  await page.getByRole("button", { name: "Expand Aceternity UI preview" }).click()
+  await expect(page.getByRole("button", { name: "Expand Aceternity UI preview" })).toHaveCount(0)
+  await page.locator(".resource-link").first().click()
   await expect(page.getByRole("dialog", { name: "Aceternity UI preview" })).toBeVisible()
-  await expect(page.locator("dialog canvas")).toBeVisible({ timeout: 20000 })
-  const colorful = (buffer: Buffer) => {
-    const { data } = PNG.sync.read(buffer)
-    let count = 0
-    for (let i = 0; i < data.length; i += 4) if (Math.max(data[i], data[i + 1], data[i + 2]) - Math.min(data[i], data[i + 1], data[i + 2]) > 60) count++
-    return count
-  }
-  await expect.poll(async () => colorful(await page.locator("dialog canvas").screenshot())).toBeGreaterThan(1000)
-  const borderColors = async () => {
-    const { data: glow, width: glowWidth, height: glowHeight } = PNG.sync.read(await page.locator("dialog canvas").screenshot())
-    let warm = 0, cool = 0
-    for (let i = 0; i < glow.length; i += 4) {
-      const x = (i / 4) % glowWidth, y = Math.floor(i / 4 / glowWidth)
-      // Only sample the border; the transparent center exposes the website image.
-      if (x >= 6 && x < glowWidth - 6 && y >= 6 && y < glowHeight - 6) continue
-      if (glow[i] > glow[i + 2] + 25 && glow[i] >= glow[i + 1]) warm++
-      if (glow[i + 2] > glow[i] + 60) cool++
-    }
-    return { warm, cool }
-  }
-  await expect.poll(async () => (await borderColors()).warm).toBeGreaterThan(1000)
-  expect((await borderColors()).cool).toBe(0)
+  await expect(page.locator("dialog canvas")).toHaveCount(0)
   expect((await page.locator(".preview-modal").boundingBox())!.width).toBeLessThanOrEqual(780)
   const image = page.locator('.preview-modal-frame .preview-image-area > img')
   const imageBounds = (await image.boundingBox())!
   const frame = (await page.locator('.preview-modal-frame').boundingBox())!
   expect(imageBounds.width).toBeCloseTo(frame.width - 16, 0)
-  expect(await image.evaluate(el => getComputedStyle(el).objectFit)).toBe("cover")
-  const first = await page.locator("dialog canvas").screenshot()
-  await page.waitForTimeout(350)
-  expect(first.equals(await page.locator("dialog canvas").screenshot())).toBe(false)
-  await page.screenshot({ path: "test-results/preview-shader.png" })
+  await expect(image).toHaveAttribute("src", /image\.thum\.io/)
+  expect(await image.evaluate(el => getComputedStyle(el).objectFit)).toBe("contain")
   await page.getByRole("button", { name: "Add to stack", exact: true }).click()
   await page.keyboard.press("Escape")
   await expect(page.locator("dialog[open]")).toHaveCount(0)
   await expect(page.locator(".stack-list")).toContainText("Aceternity UI")
   await page.locator(".resource-link").first().click()
-  await expect(page.locator("dialog canvas")).toBeVisible()
+  await expect(page.getByRole("dialog", { name: "Aceternity UI preview" })).toBeVisible()
   await page.getByRole("button", { name: "Close preview", exact: true }).click()
   await page.waitForTimeout(400)
   expect(errors).toEqual([])
