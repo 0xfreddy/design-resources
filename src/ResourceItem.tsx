@@ -1,6 +1,7 @@
 import { LinkPreview } from "./LinkPreview"
 import { ResourceCheckbox } from "./ResourceCheckbox"
 import type { Resource } from "./resources"
+import { faviconUrl, handleFaviconError } from "./favicon"
 
 export function ResourceItem({ resource, groupTitle, description, meta, selected = false, onToggleStack }: {
   resource: Resource
@@ -13,7 +14,7 @@ export function ResourceItem({ resource, groupTitle, description, meta, selected
   return <li className={`resource-row${selected ? " selected" : ""}${onToggleStack ? " stackable" : ""}`}>
     <LinkPreview href={resource.url} name={resource.name} description={description ?? resource.note ?? groupTitle} category={groupTitle} selected={selected} onToggleStack={onToggleStack}>
       <span className="resource-logo" aria-hidden="true">
-        <img src={`https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(resource.url)}&sz=64`} alt="" loading="lazy" decoding="async" />
+        <img src={faviconUrl(resource.url)} onError={event => handleFaviconError(event.currentTarget, resource.url)} alt="" loading="lazy" decoding="async" />
       </span>
       <span className="resource-copy">
         <span className="name">{resource.name}</span>

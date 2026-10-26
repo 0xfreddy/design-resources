@@ -773,17 +773,6 @@ li.selected .stack-pick,
   border-radius: 4px;
 }
 
-.preview-actions button {
-  min-height: 27px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font: inherit;
-  cursor: pointer;
-}
-
 .preview-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -793,33 +782,6 @@ li.selected .stack-pick,
   padding: 28px;
   background: rgba(0, 0, 0, 0.44);
   backdrop-filter: blur(18px);
-}
-
-.apple-frame {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  isolation: isolate;
-}
-
-.apple-frame-aura {
-  position: absolute;
-  inset: -42%;
-  z-index: -1;
-  background:
-    conic-gradient(from 0deg, #4cc9f0, #b14cff, #ff7a59, #65f0a8, #4cc9f0),
-    radial-gradient(circle, rgba(255, 255, 255, 0.65), transparent 52%);
-  filter: blur(22px) saturate(1.25);
-  opacity: 0.78;
-  animation: apple-aura-spin 8s linear infinite;
-}
-
-.apple-frame-content {
-  margin: 2px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(24px) saturate(1.2);
 }
 
 .preview-modal {
@@ -1374,7 +1336,6 @@ footer {
 .preview-modal-content { border-radius: 16px; overflow: hidden; }
 .preview-modal-frame { display: block; height: auto; aspect-ratio: 4 / 3; max-height: calc(100dvh - 180px); min-height: 0; padding: 8px; }
 .preview-modal-frame img { max-height: none; box-shadow: none; border-radius: 10px; object-fit: cover; object-position: top; }
-.preview-modal canvas { clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 16px 16px, 16px calc(100% - 16px), calc(100% - 16px) calc(100% - 16px), calc(100% - 16px) 16px, 16px 16px); }
 .preview-modal-close { top: 16px; right: 16px; z-index: 10000; background: var(--paper); }
 .preview-modal-footer { gap: 12px; padding: 14px 18px; }
 .preview-modal-footer .preview-resource-logo { width: 24px; height: 24px; border-radius: 0; }
@@ -1384,7 +1345,6 @@ footer {
 .preview-resource-copy small { font-size: 11px; color: var(--muted); }
 .visit-site { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; white-space: nowrap; text-decoration: none; }
 .preview-actions { background: var(--paper); color: var(--ink); border-top: 1px solid var(--line); }
-.preview-actions button { display: grid; place-items: center; border-radius: 6px; color: var(--ink); background: var(--surface); border-color: var(--line); }
 .directory > .category:first-child { padding-top: 4px; margin-top: 0; }
 .split-builder { padding-top: 0; overflow: hidden; }
 .split-builder > div > div:has(> .directory) { touch-action: pan-y; }

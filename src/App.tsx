@@ -15,6 +15,7 @@ import { StackFlight, type StackFlightData } from "./StackFlight"
 import MediaBetweenText from "./MediaBetweenText"
 import { SplitView } from "./reaticx/split-view"
 import { categories, type Resource } from "./resources"
+import { faviconUrl, handleFaviconError } from "./favicon"
 
 type Recommendation = {
   id: string
@@ -77,7 +78,7 @@ function getDomain(url: string) {
 }
 
 function getLogoUrl(url: string) {
-  return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`
+  return faviconUrl(url)
 }
 
 function getDescription(resource: Pick<Resource, "note" | "url">, groupTitle: string) {
@@ -417,7 +418,7 @@ export default function App() {
             {peopleStacks.length > 0 && <div className="people-stacks">
               {peopleStacks.map(stack => <article key={stack.id} className="published-stack">
                 <div className="published-owner"><strong>{stack.name}</strong>{stack.handle && <a href={`https://x.com/${encodeURIComponent(stack.handle)}`} target="_blank" rel="noreferrer">@{stack.handle}</a>}</div>
-                <ul>{stack.ids.map(id => { const resource = flatResources.find(item => item.id === id); return resource ? <li key={id}><img src={getLogoUrl(resource.url)} alt="" /><a href={resource.url} target="_blank" rel="noreferrer">{resource.name}</a></li> : null })}</ul>
+                <ul>{stack.ids.map(id => { const resource = flatResources.find(item => item.id === id); return resource ? <li key={id}><img src={getLogoUrl(resource.url)} onError={event => handleFaviconError(event.currentTarget, resource.url)} alt="" /><a href={resource.url} target="_blank" rel="noreferrer">{resource.name}</a></li> : null })}</ul>
               </article>)}
             </div>}
           </SplitView.Bottom>

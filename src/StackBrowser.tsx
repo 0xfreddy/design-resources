@@ -3,9 +3,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { ArrowUpRight, X } from "lucide-react"
 import { LinkPreview } from "./LinkPreview"
 import { ResourceItem } from "./ResourceItem"
+import { faviconUrl, handleFaviconError } from "./favicon"
 
 export type StackTab = { id: string; name: string; url: string; groupTitle: string; note?: string }
-const logo = (url: string) => `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`
 
 export function StackBrowser({ resources, remove, flyingIds = [], showResourceList = false }: { resources: StackTab[]; remove?: (id: string) => void; flyingIds?: string[]; showResourceList?: boolean }) {
   const [activeId, setActiveId] = useState(resources.at(-1)?.id)
@@ -48,7 +48,7 @@ export function StackBrowser({ resources, remove, flyingIds = [], showResourceLi
                 const next = event.key === "ArrowRight" ? (index + 1) % resources.length : event.key === "ArrowLeft" ? (index - 1 + resources.length) % resources.length : event.key === "Home" ? 0 : event.key === "End" ? resources.length - 1 : null
                 if (next !== null) { event.preventDefault(); setActiveId(resources[next].id); document.getElementById(`${id}-tab-${next}`)?.focus() }
               }}>
-              <img data-stack-icon={resource.id} style={{ visibility: flyingIds.includes(resource.id) ? "hidden" : "visible" }} src={logo(resource.url)} alt="" /><span>{resource.name}</span>
+              <img data-stack-icon={resource.id} style={{ visibility: flyingIds.includes(resource.id) ? "hidden" : "visible" }} src={faviconUrl(resource.url)} onError={event => handleFaviconError(event.currentTarget, resource.url)} alt="" /><span>{resource.name}</span>
             </button>
             {remove && <button className="browser-tab-close" title={`Remove ${resource.name}`} aria-label={`Remove ${resource.name} from your stack`} onClick={() => remove(resource.id)}><X size={13} /></button>}
           </motion.div>)}
